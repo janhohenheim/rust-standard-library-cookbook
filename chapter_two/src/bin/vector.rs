@@ -115,13 +115,12 @@ fn main() {
     // Optimizations:
 
     // Initialize the vector with a certain capacity
-    let mut large_vec: Vec<i32> = Vec::with_capacity(1_000_000_000);
+    let mut large_vec: Vec<i32> = Vec::with_capacity(1_000_000);
     println!("large_vec after creation:");
     println!("len:\t\t{}", large_vec.len());
     println!("capacity:\t{}", large_vec.capacity());
 
-    // Shrink the vector as close as possible to
-    // its length
+    // Shrink the vector as close as possible to its length
     large_vec.shrink_to_fit();
     println!("large_vec after shrinking:");
     println!("len:\t\t{}", large_vec.len());
