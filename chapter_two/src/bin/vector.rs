@@ -129,5 +129,6 @@ fn main() {
     // Remove some item, replacing it with the last
     let mut nums = vec![1, 2, 3, 4];
     let second_num = nums.swap_remove(1);
+    // This changes the order, but works in O(1)
     println!("Removed {} from {:?}", second_num, nums);
 }
