@@ -103,7 +103,7 @@ fn main() {
     
     
     // Splice a vector
-    // Webdevs, you're gonna remember this from javascript
+    // Webdevs, you're gonna remember this from Javascript
     let mut stuff = vec!["1", "2", "3", "4", "5", "6"];
     println!("Original stuff: {:?}", stuff);
     let stuff_to_insert = vec!["a", "b", "c"];
