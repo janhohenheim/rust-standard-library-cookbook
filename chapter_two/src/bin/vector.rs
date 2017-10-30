@@ -72,7 +72,7 @@ fn main() {
     for letter in alphabet.drain(..2) {
         print!("{} ", letter);
     }
-    println!("");
+    println!();
     // The drained elements are no longer in the vector
     println!("alphabet after being drained: {:?}", alphabet);
 
@@ -100,8 +100,8 @@ fn main() {
 
     // Check if the vector contains an element
     println!("Does 'colors' contain \"red\"? {}", colors.contains(&"red"));
-    
-    
+
+
     // Splice a vector
     // Webdevs, you're gonna remember this from Javascript
     let mut stuff = vec!["1", "2", "3", "4", "5", "6"];
