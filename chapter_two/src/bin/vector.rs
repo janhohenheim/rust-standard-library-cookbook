@@ -44,6 +44,10 @@ fn main() {
     names.retain(|name| name.starts_with('A'));
     println!("Names starting with A: {:?}", names);
 
+    // Check if the vector contains an element
+    println!("Does 'names' contain \"Alex\"? {}", names.contains(&"Alex"));
+
+
 
     // Remove consecutive(!) duplicates
     let mut nums = vec![1, 2, 2, 3, 4, 4, 4, 5];
@@ -98,12 +102,8 @@ fn main() {
     // This empties the second vector
     println!("second_half after appending: {:?}", second_half);
 
-    // Check if the vector contains an element
-    println!("Does 'colors' contain \"red\"? {}", colors.contains(&"red"));
-
-
     // Splice a vector
-    // Webdevs, you're gonna remember this from Javascript
+    // Webdevs, you're gonna remember this from JavaScript
     let mut stuff = vec!["1", "2", "3", "4", "5", "6"];
     println!("Original stuff: {:?}", stuff);
     let stuff_to_insert = vec!["a", "b", "c"];
@@ -113,7 +113,6 @@ fn main() {
 
 
     // Optimizations:
-
     // Initialize the vector with a certain capacity
     let mut large_vec: Vec<i32> = Vec::with_capacity(1_000_000);
     println!("large_vec after creation:");
