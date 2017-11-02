@@ -41,18 +41,19 @@ fn main() {
 
     // Iterating accesses all keys and values
     println!("All ratings:");
-    for (key, value) in tv_ratings.iter() {
+    for (key, value) in &tv_ratings {
         println!("{}\t: {}", key, value);
     }
 
     // We can iterate mutably
     println!("All ratings with 100 as a maximum:");
-    for (key, value) in tv_ratings.iter_mut() {
+    for (key, value) in &mut tv_ratings {
         *value *= 10;
         println!("{}\t: {}", key, value);
     }
 
-    // Iterating without calling .iter() moves the hashmap
+    // Iterating without calling referencing the hashmap
+    // moves the moves its contents
     for _ in tv_ratings {}
     // tv_ratings is not usable anymore
 
