@@ -33,9 +33,54 @@ fn main() {
     }
 
 
+    // Remove a key and its value
+    let removed_value = tv_ratings.remove("The IT Crowd");
+    if let Some(removed_value) = removed_value {
+        println!("The removed series had a rating of {}", removed_value);
+    }
+
     // Iterating accesses all keys and values
     println!("All ratings:");
-    for (key, value) in tv_ratings {
+    for (key, value) in tv_ratings.iter() {
         println!("{}\t: {}", key, value);
+    }
+
+    // We can iterate mutably
+    println!("All ratings with 100 as a maximum:");
+    for (key, value) in tv_ratings.iter_mut() {
+        *value *= 10;
+        println!("{}\t: {}", key, value);
+    }
+
+    // Iterating without calling .iter() moves the hashmap
+    for _ in tv_ratings {}
+    // tv_ratings is not usable anymore
+
+
+    // Like with the other collections, you can preallocate a size
+    // to gain some performance
+    let mut age = HashMap::with_capacity(10);
+    age.insert("Dory", 8);
+    age.insert("Nemo", 5);
+    age.insert("Merlin", 10);
+    age.insert("Bruce", 9);
+
+    // Iterate over all keys
+    println!("All names:");
+    for name in age.keys() {
+        println!("{}", name);
+    }
+
+    // Iterate over all values
+    println!("All ages:");
+    for age in age.values() {
+        println!("{}", age);
+    }
+
+    // Iterate over all values and mutate them
+    println!("All ages in 10 years");
+    for age in age.values_mut() {
+        *age += 10;
+        println!("{}", age);
     }
 }
