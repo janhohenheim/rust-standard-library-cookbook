@@ -187,6 +187,14 @@ fn main() {
     let zipped: Vec<_> = swiss_post_codes.iter().zip(swiss_towns.iter()).collect();
     println!("zipped: {:?}", zipped);
 
+    // Because zip is lazy, you can use two infine ranges
+    let zipped: Vec<_> = (b'A'..)
+        .zip(1..)
+        .take(10)
+        .map(|(ch, num)| (ch as char, num))
+        .collect();
+    println!("zipped: {:?}", zipped);
+
 
     // Apply functions to all items
 
