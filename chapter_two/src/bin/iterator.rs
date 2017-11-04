@@ -187,14 +187,33 @@ fn main() {
     let zipped: Vec<_> = swiss_post_codes.iter().zip(swiss_towns.iter()).collect();
     println!("zipped: {:?}", zipped);
 
-    // Apply functions to all items
 
+    // Apply functions to all items
 
     // Change the items' types
     let numbers_as_strings: Vec<_> = (1..11).map(|x| x.to_string()).collect();
     println!("numbers_as_strings: {:?}", numbers_as_strings);
 
-    // Mutate all items
-    let squared: Vec<_> = (1.11).for_each(|x| x *= x).collect();
-    println!("squared: {:?}", squared);
+    // Access all items
+    println!("First ten squares:");
+    (1..11).for_each(|x| print!("{} ", x));
+    println!();
+
+    // filter and map items at the same time!
+    let squares: Vec<_> = (1..50)
+        .filter_map(|x| if x % 3 == 0 { Some(x * x) } else { None })
+        .collect();
+    println!(
+        "Squares of all numbers under 50 that are divisible by 3: {:?}",
+        squares
+    );
+
+    // The real strength of iterators comes from combining them
+
+    // Retrieve the entire alphabet in lower and uppercase:
+    let alphabet: Vec<_> = (b'A' .. b'z' + 1) // Start as u8
+        .map(|c| c as char)            // Convert all to chars
+        .filter(|c| c.is_alphabetic()) // Filter only alphabetic chars
+        .collect(); // Collect as Vec<char>
+    println!("alphabet: {:?}", alphabet);
 }
