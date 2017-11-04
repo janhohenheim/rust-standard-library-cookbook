@@ -26,6 +26,26 @@ fn main() {
     fruits.swap(0, 1);
     println!("fruits after swap: {:?}", fruits);
 
+    // Access the first and last elements
+    let first = fruits.first();
+    if let Some(first) = first {
+        println!("First fruit: {}", first);
+    }
+    let last = fruits.last();
+    if let Some(last) = last {
+        println!("Last fruit: {}", last);
+    }
+
+    // Access arbitrary elements
+    let second = fruits.get(1);
+    if let Some(second) = second {
+        println!("Second fruit: {}", second);
+    }
+    // Access arbitrary elements without bonds checking
+    let second = fruits[1];
+    println!("Second fruit: {}", second);
+
+
 
     // Initialize the vector with a value
     // Here, we fill our vector with five zeroes

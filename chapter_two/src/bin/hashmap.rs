@@ -62,7 +62,7 @@ fn main() {
     // to gain some performance
     let mut age = HashMap::with_capacity(10);
     age.insert("Dory", 8);
-    age.insert("Nemo", 5);
+    age.insert("Nemo", 3);
     age.insert("Merlin", 10);
     age.insert("Bruce", 9);
 
@@ -84,4 +84,14 @@ fn main() {
         *age += 10;
         println!("{}", age);
     }
+
+
+    // Use the entry API to assign defaults
+    // for values that are not yet in the HashMap
+    {
+        let age_of_coral = age.entry("coral").or_insert(11);
+        println!("age_of_coral: {}", age_of_coral);
+    }
+    let age_of_coral = age.entry("coral").or_insert(15);
+    println!("age_of_coral: {}", age_of_coral);
 }
