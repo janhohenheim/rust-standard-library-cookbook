@@ -14,51 +14,55 @@ fn main() {
 
 
 fn fibonacci() -> Fibonacci {
-    Fibonacci {
-        curr: 0,
-        next: 1,
-    }
+    Fibonacci { curr: 0, next: 1 }
 }
 struct Fibonacci {
     curr: u32,
     next: u32,
 }
-// A custom iterator has to implement 
+// A custom iterator has to implement
 // only one method: What comes next
 impl Iterator for Fibonacci {
     type Item = u32;
     fn next(&mut self) -> Option<u32> {
         let old = self.curr;
         self.curr = self.next;
-        self.next = old + self.next;
+        self.next += old;
         Some(old)
     }
 }
 
 
 use std::ops::Mul;
-struct SquaredVec<T> where T: Mul + Copy {
-    vec: Vec<T::Output>
+struct SquaredVec<T>
+where
+    T: Mul + Copy,
+{
+    vec: Vec<T::Output>,
 }
-impl<T> SquaredVec<T> where T: Mul + Copy {
+impl<T> SquaredVec<T>
+where
+    T: Mul + Copy,
+{
     fn new() -> Self {
-        SquaredVec {
-            vec: Vec::new()
-        }
+        SquaredVec { vec: Vec::new() }
     }
     fn push(&mut self, item: T) {
-        self.vec.push(item*item);
+        self.vec.push(item * item);
     }
 }
 
 // When creating an iterator over a collection-like struct
-// It's best to just allow it to be convertible into 
+// It's best to just allow it to be convertible into
 // a slice of your underlying type.
 // This way you automatically implemented a bunch of methods
 // and are flexible enough to change your implementation later on
 use std::ops::Deref;
-impl<T> Deref for SquaredVec<T> where T: Mul + Copy {
-    type Target=[T::Output];
+impl<T> Deref for SquaredVec<T>
+where
+    T: Mul + Copy,
+{
+    type Target = [T::Output];
     fn deref(&self) -> &Self::Target {
         &self.vec
     }
