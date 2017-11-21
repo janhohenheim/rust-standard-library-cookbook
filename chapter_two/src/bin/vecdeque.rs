@@ -61,7 +61,7 @@ fn main() {
     // pretty much the same as the vector's
     // However, the VecDeque has additional options
     // when swap removing!
-    let mut some_queue = VecDeque::with_capacity(5)
+    let mut some_queue = VecDeque::with_capacity(5);
     some_queue.push_back("A");
     some_queue.push_back("B");
     some_queue.push_back("C");
