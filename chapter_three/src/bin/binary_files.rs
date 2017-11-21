@@ -1,40 +1,82 @@
 extern crate byteorder;
-use std::io::{Cursor, Seek, SeekFrom};
-use byteorder::{BigEndian, LittleEndian, ReadBytesExt, WriteBytesExt};
-use std::fs::{File, OpenOptions};
-use std::io::{self, BufReader, BufWriter, Lines, SeekFrom, Write};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt, BE, LE};
+use std::fs::File;
+use std::io::{self, BufReader, BufWriter, Read};
 use std::io::prelude::*;
 
 
 fn main() {
-    // Create a file and fill it with data
     let path = "./bar.bin";
-    append_and_read(path, b"Last line in the file, goodbye").expect("Failed to read and write file");
+    write_dummy_protocol(path).expect("Failed write file");
+    let payload = read_protocol(path).expect("Failed to read file");
+    print!("The protocol contained the following payload: ");
+    for num in payload {
+        print!("0x{:X} ", num);
+    }
+    println!();
+}
+
+// Write a simple custom protocol
+fn write_dummy_protocol(path: &str) -> io::Result<()> {
+    let file = File::create(path)?;
+    let mut buf_writer = BufWriter::new(file);
+
+    // Let's say our binary file starts with a magic string
+    // to show readers that this is our protocoll
+    let magic = b"MyProtocol";
+    buf_writer.write_all(magic)?;
+
+    // Now comes another magic value to indicate
+    // our endianness
+    let endianness = b"LE";
+    buf_writer.write_all(endianness)?;
+
+    // Let's fill it with two numbers in u32
+    buf_writer.write_u32::<LE>(0xDEAD)?;
+    buf_writer.write_u32::<LE>(0xBEEF)?;
+
+
+    Ok(())
 }
 
 
+fn read_protocol(path: &str) -> io::Result<Vec<u32>> {
+    let file = File::open(path)?;
+    let mut buf_reader = BufReader::new(file);
 
-fn append_and_read(path: &str, content: &[u8]) -> io::Result<()> {
-    let file = OpenOptions::new().read(true).append(true).open(path)?;
-    // Passing a reference of the file will not move it
-    // allowing you to create both a reader and a writer
-    let mut buf_reader = BufReader::new(&file);
-    let mut buf_writer = BufWriter::new(&file);
+    // Our protocol has to begin with a certain string
+    // Namely "MyProtocol", which is 10 bytes long
+    let mut start = [0u8; 10];
+    buf_reader.read_exact(&mut start)?;
+    if &start != b"MyProtocol" {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Protocoll didn't start with the expected magic string",
+        ));
+    }
 
-    let mut file_content = String::new();
-    buf_reader.read_to_string(&mut file_content)?;
-    println!("File before appending:\n{}", file_content);
+    // Now comes the endianness indicator
+    let mut endian = [0u8; 2];
+    buf_reader.read_exact(&mut endian)?;
+    match &endian {
+        b"LE" => read_protocoll_payload::<LE, _>(&mut buf_reader),
+        b"BE" => read_protocoll_payload::<BE, _>(&mut buf_reader),
+        _ => Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Failed to parse endianness",
+        )),
+    }
+}
 
-    // Appending will shift your positional pointer
-    // so you have to save and restore it
-    let pos = buf_reader.seek(SeekFrom::Current(0))?;
-    buf_writer.write_all(content.as_bytes())?;
-    // Flushing forces the write to happen right now
-    buf_writer.flush()?;
-    buf_reader.seek(SeekFrom::Start(pos))?;
 
-    buf_reader.read_to_string(&mut file_content)?;
-    println!("File after appending:\n{}", file_content);
-
-    Ok(())
+// Read as much of the payload as possible
+fn read_protocoll_payload<E, R>(reader: &mut R) -> io::Result<Vec<u32>>
+where
+    E: ByteOrder,
+    R: ReadBytesExt,
+{
+    // Todo: Make this dynamic
+    let mut payload = vec![0u32; 2];
+    reader.read_u32_into::<E>(&mut payload)?;
+    Ok(payload)
 }
