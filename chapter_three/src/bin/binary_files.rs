@@ -35,7 +35,6 @@ fn write_dummy_protocol(path: &str) -> io::Result<()> {
     buf_writer.write_u32::<LE>(0xDEAD)?;
     buf_writer.write_u32::<LE>(0xBEEF)?;
 
-
     Ok(())
 }
 
@@ -51,7 +50,7 @@ fn read_protocol(path: &str) -> io::Result<Vec<u32>> {
     if &start != b"MyProtocol" {
         return Err(io::Error::new(
             io::ErrorKind::Other,
-            "Protocoll didn't start with the expected magic string",
+            "Protocol didn't start with the expected magic string",
         ));
     }
 
@@ -67,7 +66,6 @@ fn read_protocol(path: &str) -> io::Result<Vec<u32>> {
         )),
     }
 }
-
 
 // Read as much of the payload as possible
 fn read_protocoll_payload<E, R>(reader: &mut R) -> io::Result<Vec<u32>>
