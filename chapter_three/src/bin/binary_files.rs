@@ -21,7 +21,7 @@ fn write_dummy_protocol(path: &str) -> io::Result<()> {
     let file = File::create(path)?;
     let mut buf_writer = BufWriter::new(file);
 
-    // Let's say our binary file starts with a magic string
+    // Let's say our binary file starts with a magic number
     // to show readers that this is our protocoll
     let magic = b"MyProtocol";
     buf_writer.write_all(magic)?;
@@ -75,8 +75,27 @@ where
     E: ByteOrder,
     R: ReadBytesExt,
 {
-    // Todo: Make this dynamic
-    let mut payload = vec![0u32; 2];
-    reader.read_u32_into::<E>(&mut payload)?;
-    Ok(payload)
+    let mut payload = Vec::new();
+    const SIZE_OF_U32: usize = 4;
+    loop {
+        let mut raw_payload = [0; SIZE_OF_U32];
+        // Read the next 4 bytes
+        match reader.read(&mut raw_payload)? {
+            // Zero means we reached the end
+            0 => return Ok(payload),
+            // SIZE_OF_U32 means we read a complete number
+            SIZE_OF_U32 => {
+                let as_u32 = raw_payload.as_ref().read_u32::<E>()?;
+                payload.push(as_u32)
+            }
+            // Anything else means the last element was not
+            // a valid u32
+            _ => {
+                return Err(io::Error::new(
+                    io::ErrorKind::UnexpectedEof,
+                    "Payload ended unexpectedly",
+                ))
+            }
+        }
+    }
 }
