@@ -57,6 +57,7 @@ fn main() {
         .expect("Failed to write decoded file");
 }
 
+
 fn encode_bytes(bytes: &[u8]) -> io::Result<Vec<u8>> {
     // You can choose your compression algorithm and it's efficiency
     let mut encoder = ZlibEncoder::new(Vec::new(), Compression::Default);
@@ -71,6 +72,7 @@ fn decode_bytes(bytes: &[u8]) -> io::Result<Vec<u8>> {
     Ok(buffer)
 }
 
+
 fn encode_file(file: &mut Read) -> io::Result<Vec<u8>> {
     // Files have a built-in encoder
     let mut encoded = file.zlib_encode(Compression::Best);
@@ -78,7 +80,6 @@ fn encode_file(file: &mut Read) -> io::Result<Vec<u8>> {
     encoded.read_to_end(&mut buffer)?;
     Ok(buffer)
 }
-
 
 fn decode_file(file: &mut Read) -> io::Result<Vec<u8>> {
     let mut buffer = Vec::new();
