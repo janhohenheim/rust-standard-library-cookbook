@@ -1,5 +1,4 @@
 extern crate glob;
-
 use glob::{glob, glob_with, MatchOptions};
 
 fn main() {
