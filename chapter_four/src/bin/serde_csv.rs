@@ -1,12 +1,12 @@
 extern crate csv;
-
+extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
 use std::io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write};
 use std::fs::OpenOptions;
 
-#[derive(Debug, Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct Planet {
     name: String,
     radius: f32,
@@ -38,17 +38,55 @@ where
 {
     let mut wtr = csv::Writer::from_writer(writer);
 
-    // The header is just a normal record
-    wtr.write_record(&["planet", "radius", "distance_from_sun", "gravity"])?;
-
-    wtr.write_record(&["Mercury", "0.38", "0.47", "0.38"])?;
-    wtr.write_record(&["Venus", "0.95", "0.73", "0.9"])?;
-    wtr.write_record(&["Earth", "1", "1", "1"])?;
-    wtr.write_record(&["Mars", "0.53", "1.67", "0.38"])?;
-    wtr.write_record(&["Jupiter", "11.21", "5.46", "2.53"])?;
-    wtr.write_record(&["Saturn", "9.45", "10.12", "1.07"])?;
-    wtr.write_record(&["Uranus", "4.01", "20.11", "0.89"])?;
-    wtr.write_record(&["Neptune", "3.88", "30.33", "1.14"])?;
+    // No need to specify a header; Serde creates it for us
+    wtr.serialize(Planet {
+        name: "Mercury".to_string(),
+        radius: 0.38,
+        distance_from_sun: 0.47,
+        gravity: 0.38,
+    })?;
+    wtr.serialize(Planet {
+        name: "Venus".to_string(),
+        radius: 0.95,
+        distance_from_sun: 0.73,
+        gravity: 0.9,
+    })?;
+    wtr.serialize(Planet {
+        name: "Earth".to_string(),
+        radius: 1.0,
+        distance_from_sun: 1.0,
+        gravity: 1.0,
+    })?;
+    wtr.serialize(Planet {
+        name: "Mars".to_string(),
+        radius: 0.53,
+        distance_from_sun: 1.67,
+        gravity: 0.38,
+    })?;
+    wtr.serialize(Planet {
+        name: "Jupiter".to_string(),
+        radius: 11.21,
+        distance_from_sun: 5.46,
+        gravity: 2.53,
+    })?;
+    wtr.serialize(Planet {
+        name: "Saturn".to_string(),
+        radius: 9.45,
+        distance_from_sun: 10.12,
+        gravity: 1.07,
+    })?;
+    wtr.serialize(Planet {
+        name: "Uranus".to_string(),
+        radius: 4.01,
+        distance_from_sun: 20.11,
+        gravity: 0.89,
+    })?;
+    wtr.serialize(Planet {
+        name: "Neptune".to_string(),
+        radius: 3.88,
+        distance_from_sun: 30.33,
+        gravity: 1.14,
+    })?;
     wtr.flush()?;
     Ok(())
 }
@@ -60,21 +98,13 @@ where
     let mut rdr = csv::Reader::from_reader(reader);
     println!("Comparing planets in the solar system with the earth");
     println!("where a value of '1' means 'equal to earth'");
-    for result in rdr.records() {
+    for result in rdr.deserialize() {
         println!("-------");
-        let record = result?;
-        if let Some(name) = record.get(0) {
-            println!("Name: {}", name);
-        }
-        if let Some(radius) = record.get(1) {
-            println!("Radius: {}", radius);
-        }
-        if let Some(distance) = record.get(2) {
-            println!("Distance from sun: {}", distance);
-        }
-        if let Some(gravity) = record.get(3) {
-            println!("Surface gravity: {}", gravity);
-        }
+        let planet: Planet = result?;
+        println!("Name: {}", planet.name);
+        println!("Radius: {}", planet.radius);
+        println!("Distance from sun: {}", planet.distance_from_sun);
+        println!("Surface gravity: {}", planet.gravity);
     }
     Ok(())
 }

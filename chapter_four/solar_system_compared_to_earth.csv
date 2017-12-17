@@ -1,4 +1,4 @@
-planet,radius,distance_from_sun,gravity
+name,radius,distance_from_sun,gravity
 Mercury,0.38,0.47,0.38
 Venus,0.95,0.73,0.9
 Earth,1,1,1
