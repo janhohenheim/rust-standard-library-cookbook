@@ -30,7 +30,7 @@ where
     let mut wtr = csv::Writer::from_writer(writer);
 
     // The header is just a normal record
-    wtr.write_record(&["planet", "radius", "distance_from_sun", "gravity"])?;
+    wtr.write_record(&["name", "radius", "distance_from_sun", "gravity"])?;
 
     wtr.write_record(&["Mercury", "0.38", "0.47", "0.38"])?;
     wtr.write_record(&["Venus", "0.95", "0.73", "0.9"])?;
