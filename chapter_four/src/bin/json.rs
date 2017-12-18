@@ -17,10 +17,17 @@ struct PetOwner {
 #[derive(Serialize, Deserialize)]
 struct Pet {
     name: String,
-    species: String,
+    species: AllowedSpecies,
     // It is usual for many JSON keys to be optional
     age: Option<u8>,
     colour: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+enum AllowedSpecies {
+    Dog,
+    Turtle,
+    Cat,
 }
 
 fn main() {
@@ -52,19 +59,19 @@ where
         pets: vec![
             Pet {
                 name: "Waldo".to_string(),
-                species: "Dog".to_string(),
+                species: AllowedSpecies::Dog,
                 age: Some(2),
                 colour: None,
             },
             Pet {
                 name: "Speedy".to_string(),
-                species: "Turtle".to_string(),
+                species: AllowedSpecies::Turtle,
                 age: Some(47),
                 colour: Some("Green".to_string()),
             },
             Pet {
                 name: "Meows".to_string(),
-                species: "Cat".to_string(),
+                species: AllowedSpecies::Cat,
                 age: None,
                 colour: Some("Orange".to_string()),
             },
@@ -95,7 +102,7 @@ where
     println!("\nPets:");
     for pet in pet_owner.pets {
         println!("  Name: {}", pet.name);
-        println!("  Species: {}", pet.species);
+        println!("  Species: {:?}", pet.species);
         if let Some(age) = pet.age {
             println!("  Age: {}", age);
         }
