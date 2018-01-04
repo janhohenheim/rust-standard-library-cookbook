@@ -15,6 +15,7 @@ bitflags! {
 }
 
 impl Spices {
+    // Implementing a "clear" method can be useful
     pub fn clear(&mut self) -> &mut Self {
         self.bits = 0;
         self
@@ -24,6 +25,7 @@ impl Spices {
 fn main() {
     let classic = Spices::SALT | Spices::PEPPER;
     let spicy = Spices::PEPPER | Spices::CHILLY;
+    // Bitfields can nicely be printed
     println!("Classic: {:?}", classic);
     println!("Bits: {:08b}", classic.bits());
     println!("Spicy: {:?}", spicy);
@@ -31,11 +33,13 @@ fn main() {
 
     println!();
 
+    // Use set operations
     println!("Union: {:?}", classic | spicy);
     println!("Intersection: {:?}", classic & spicy);
     println!("Difference: {:?}", classic - spicy);
     println!("Complement: {:?}", !classic);
 
+    // Interact with flags in a bitfield
     let mut custom = classic | spicy;
     println!("Custom spice mix: {:?}", custom);
     custom.insert(Spices::SAFFRON);
@@ -53,6 +57,7 @@ fn main() {
         println!("I hope I didn't put too much salt in it");
     }
 
+    // Read flags from raw bits
     let bits = 0b0000_1101;
     if let Some(from_bits) = Spices::from_bits(bits) {
         println!("The bits {:08b} represent the flags {:?}", bits, from_bits);
