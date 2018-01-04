@@ -1,13 +1,12 @@
 #[macro_use]
 extern crate bitflags;
 
-
 bitflags! {
     struct Spices: u32 {
-        const SALT       = 0b00000001;
-        const PEPPER     = 0b00000010;
-        const CHILLY     = 0b00000100;
-        const SAFFRON    = 0b00001000;
+        const SALT       = 0b0000_0001;
+        const PEPPER     = 0b0000_0010;
+        const CHILLY     = 0b0000_0100;
+        const SAFFRON    = 0b0000_1000;
         const ALL        = Self::SALT.bits
                          | Self::PEPPER.bits
                          | Self::CHILLY.bits
@@ -21,8 +20,6 @@ impl Spices {
         self
     }
 }
-
-
 
 fn main() {
     let classic = Spices::SALT | Spices::PEPPER;
@@ -39,28 +36,27 @@ fn main() {
     println!("Difference: {:?}", classic - spicy);
     println!("Complement: {:?}", !classic);
 
-
     let mut custom = classic | spicy;
     println!("Custom spice mix: {:?}", custom);
-    /* To do: Showcase the following
-    The following methods are defined for the generated struct:
+    custom.insert(Spices::SAFFRON);
+    // Note that ALL is now also contained in the bitflag
+    println!("Custom spice after adding saffron: {:?}", custom);
+    custom.toggle(Spices::CHILLY);
+    println!("Custom spice after toggling chilly: {:?}", custom);
+    custom.remove(Spices::SALT);
+    println!("Custom spice after removing salt: {:?}", custom);
 
-    empty: an empty set of flags
-    all: the set of all flags
-    bits: the raw value of the flags currently stored
-    from_bits: convert from underlying bit representation, unless that representation contains bits that do not correspond to a flag
-    from_bits_truncate: convert from underlying bit representation, dropping any bits that do not correspond to flags
-    is_empty: true if no flags are currently stored
-    is_all: true if all flags are currently set
-    intersects: true if there are flags common to both self and other
-    contains: true all of the flags in other are contained within self
-    insert: inserts the specified flags in-place
-    remove: removes the specified flags in-place
-    toggle: the specified flags will be inserted if not present, and removed if they are.
-    set: inserts or removes the specified flags depending on the passed value
-    */
+    // This could be user input
+    let wants_salt = true;
+    custom.set(Spices::SALT, wants_salt);
+    if custom.contains(Spices::SALT) {
+        println!("I hope I didn't put too much salt in it");
+    }
 
-    // To do: Show default
+    let bits = 0b0000_1101;
+    if let Some(from_bits) = Spices::from_bits(bits) {
+        println!("The bits {:08b} represent the flags {:?}", bits, from_bits);
+    }
 
     custom.clear();
     println!("Custom spice mix after clearing: {:?}", custom);
