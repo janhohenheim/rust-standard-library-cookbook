@@ -25,7 +25,7 @@ impl Spices {
 fn main() {
     let classic = Spices::SALT | Spices::PEPPER;
     let spicy = Spices::PEPPER | Spices::CHILLY;
-    // Bitfields can nicely be printed
+    // Bit fields can nicely be printed
     println!("Classic: {:?}", classic);
     println!("Bits: {:08b}", classic.bits());
     println!("Spicy: {:?}", spicy);
@@ -39,11 +39,11 @@ fn main() {
     println!("Difference: {:?}", classic - spicy);
     println!("Complement: {:?}", !classic);
 
-    // Interact with flags in a bitfield
+    // Interact with flags in a bit field
     let mut custom = classic | spicy;
     println!("Custom spice mix: {:?}", custom);
     custom.insert(Spices::SAFFRON);
-    // Note that ALL is now also contained in the bitflag
+    // Note that ALL is now also contained in the bit field
     println!("Custom spice after adding saffron: {:?}", custom);
     custom.toggle(Spices::CHILLY);
     println!("Custom spice after toggling chilly: {:?}", custom);
