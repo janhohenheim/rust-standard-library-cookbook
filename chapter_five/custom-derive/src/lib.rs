@@ -13,14 +13,14 @@ pub fn hello_world(input: TokenStream) -> TokenStream {
     let s = input.to_string();
 
     // Parse the string representation into an abstract syntax tree
-    let ast = syn::parse_derive_input(&s)
-        .expect("Failed to parse the source into an AST");
-     
+    let ast = syn::parse_derive_input(&s).expect("Failed to parse the source into an AST");
+
     // Build the implementation
     let gen = impl_hello_world(&ast);
 
     // Return the generated implementation
-    gen.parse().expect("Failed to parse the AST generated from deriving from HelloWorld")
+    gen.parse()
+        .expect("Failed to parse the AST generated from deriving from HelloWorld")
 }
 
 fn impl_hello_world(ast: &syn::DeriveInput) -> quote::Tokens {
@@ -33,8 +33,8 @@ fn impl_hello_world(ast: &syn::DeriveInput) -> quote::Tokens {
         impl HelloWorld for #struct_name {
             fn hello_world() {
                 println!(
-                    "The struct or enum {} says: \"Hello world from {}!\"", 
-                    stringify!(#struct_name), 
+                    "The struct or enum {} says: \"Hello world from {}!\"",
+                    stringify!(#struct_name),
                     #hello_world_name
                 );
             }
@@ -54,12 +54,15 @@ fn get_name_attribute(ast: &syn::DeriveInput) -> Option<&str> {
                 Some(value_as_str)
             } else {
                 panic!(
-                    "Expected a string as the value of {}, found {:?} instead", 
+                    "Expected a string as the value of {}, found {:?} instead",
                     ATTR_NAME, value
                 );
             }
         } else {
-            panic!("Expected an attribute in the form #[{} = \"Some value\"]", ATTR_NAME);
+            panic!(
+                "Expected an attribute in the form #[{} = \"Some value\"]",
+                ATTR_NAME
+            );
         }
     } else {
         None
