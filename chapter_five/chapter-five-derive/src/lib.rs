@@ -11,7 +11,6 @@ use proc_macro::TokenStream;
 pub fn hello_world(input: TokenStream) -> TokenStream {
     // Construct a string representation of the type definition
     let s = input.to_string();
-
     // Parse the string representation into an abstract syntax tree
     let ast = syn::parse_derive_input(&s).expect("Failed to parse the source into an AST");
 
@@ -24,17 +23,17 @@ pub fn hello_world(input: TokenStream) -> TokenStream {
 }
 
 fn impl_hello_world(ast: &syn::DeriveInput) -> quote::Tokens {
-    let struct_name = &ast.ident;
+    let identifier = &ast.ident;
     // Use the name provided by the attribute
-    // If there is no attribute, use the struct name
-    let hello_world_name = get_name_attribute(ast).unwrap_or_else(|| struct_name.as_ref());
+    // If there is no attribute, use the identifier
+    let hello_world_name = get_name_attribute(ast).unwrap_or_else(|| identifier.as_ref());
     quote! {
         // Insert an implementation for our trait
-        impl HelloWorld for #struct_name {
+        impl HelloWorld for #identifier {
             fn hello_world() {
                 println!(
                     "The struct or enum {} says: \"Hello world from {}!\"",
-                    stringify!(#struct_name),
+                    stringify!(#identifier),
                     #hello_world_name
                 );
             }
@@ -55,7 +54,8 @@ fn get_name_attribute(ast: &syn::DeriveInput) -> Option<&str> {
             } else {
                 panic!(
                     "Expected a string as the value of {}, found {:?} instead",
-                    ATTR_NAME, value
+                    ATTR_NAME,
+                    value
                 );
             }
         } else {
