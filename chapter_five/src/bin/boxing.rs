@@ -91,7 +91,7 @@ fn main() {
 // Via trait objects we can return any iterator
 fn caps_words_iter<'a>(text: &'a str) -> Box<Iterator<Item = String> + 'a> {
     // Return an iterator over every word converted into ALL_CAPS
-    Box::new(text.split(' ').map(|word| word.to_uppercase()))
+    Box::new(text.trim().split(' ').map(|word| word.to_uppercase()))
 }
 
 // Same goes for errors
