@@ -46,7 +46,7 @@ fn main() {
     let hello_world: String = "Hello World!".into();
     let hello_world = String::from("Hello World!");
 
-    // Vec<u8> implements From<String>
+    // Vec<u8> implements From<&str>
     // so hello_world_bytes has the value b"Hello World!"
     let hello_world_bytes: Vec<u8> = "Hello World!".into();
     let hello_world_bytes = Vec::<u8>::from("Hello World!");
