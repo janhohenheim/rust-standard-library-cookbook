@@ -1,5 +1,5 @@
 use std::ops::MulAssign;
-use std::fmt::{Debug, Display};
+use std::fmt::Display;
 
 // This structure doubles all elements it stores
 struct DoubleVec<T>(Vec<T>);
@@ -19,12 +19,6 @@ where
     }
 }
 
-impl<T> AsRef<Vec<T>> for DoubleVec<T> {
-    fn as_ref(&self) -> &Vec<T> {
-        &self.0
-    }
-}
-
 // Allowing conversion from a slice of Ts
 // where T is again multipliable with an integer
 impl<'a, T> From<&'a [T]> for DoubleVec<T>
@@ -35,6 +29,13 @@ where
         // Vec<T: MulAssign<i32>> automatically
         // implements Into<DoubleVec<T>>
         slice.to_vec().into()
+    }
+}
+
+// Allowing conversion from a &DoubleVec<T> to a &Vec<T>
+impl<T> AsRef<Vec<T>> for DoubleVec<T> {
+    fn as_ref(&self) -> &Vec<T> {
+        &self.0
     }
 }
 
