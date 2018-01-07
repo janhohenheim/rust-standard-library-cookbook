@@ -5,12 +5,12 @@ use std::error::Error;
 use std::io::Read;
 use std::fmt::Debug;
 
-
 #[derive(Debug)]
 struct Node<T> {
     data: T,
-    subnodes: Option<(Box<Node<T>>, Box<Node<T>>)>,
+    subnodes: Option<(BoxedNode<T>, BoxedNode<T>)>,
 }
+type BoxedNode<T> = Box<Node<T>>;
 
 impl<T> Node<T> {
     fn new(data: T) -> Self {
@@ -65,6 +65,14 @@ fn main() {
         .add_subnodes(Node::new(0), Node::new(1803));
     println!("Our binary tree looks like this: {:?}", root);
 
+    // Polymorphism
+    let mut zoo: Vec<Box<Animal>> = Vec::new();
+    zoo.push(Box::new(Dog {}));
+    zoo.push(Box::new(Cat {}));
+    for animal in zoo {
+        println!("{:?} says {}", animal, animal.sound());
+    }
+
     for word in caps_words_iter("do you feel lucky, punk‽") {
         println!("{}", word);
     }
@@ -77,19 +85,12 @@ fn main() {
     let multiplier = create_multiplier(23);
     let result = multiplier(3);
     println!("23 * 3 = {}", result);
-
-    // Polymorphism
-    let mut zoo: Vec<Box<Animal>> = Vec::new();
-    zoo.push(Box::new(Dog {}));
-    zoo.push(Box::new(Cat {}));
-    for animal in zoo {
-        println!("{:?} says {}", animal, animal.sound());
-    }
 }
 
 
 // Via trait objects we can return any iterator
 fn caps_words_iter<'a>(text: &'a str) -> Box<Iterator<Item = String> + 'a> {
+    // Return an iterator over every word converted into ALL_CAPS
     Box::new(text.split(' ').map(|word| word.to_uppercase()))
 }
 
