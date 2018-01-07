@@ -2,6 +2,7 @@ use std::ops::MulAssign;
 use std::fmt::Display;
 
 // This structure doubles all elements it stores
+#[derive(Debug)]
 struct DoubleVec<T>(Vec<T>);
 
 
@@ -54,12 +55,12 @@ fn main() {
     // We can convert a Vec<T: MulAssign<i32>> into a DoubleVec
     let vec = vec![1, 2, 3];
     let double_vec = DoubleVec::from(vec);
-    println!("Creating a DoubleVec from a Vec: {:?}", double_vec.0);
+    println!("Creating a DoubleVec from a Vec: {:?}", double_vec);
 
     // Vec<T: MulAssign<i32>> automatically implements Into<DoubleVec<T>>
     let vec = vec![1, 2, 3];
     let double_vec: DoubleVec<_> = vec.into();
-    println!("Converting a Vec into a DoubleVec: {:?}", double_vec.0);
+    println!("Converting a Vec into a DoubleVec: {:?}", double_vec);
 
     // A reference to DoubleVec can be converted to a reference to Vec
     // Which in turn dereferences to a slice
