@@ -1,0 +1,3 @@
+INFO 1517772365 at own_logging: A lightning strikes a body
+WARN 1517772365 at own_logging: It's moving
+ERROR 1517772365 at own_logging: It's alive!

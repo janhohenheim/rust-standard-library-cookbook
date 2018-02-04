@@ -6,49 +6,71 @@ use std::fs::{File, OpenOptions};
 use std::io::{self, BufWriter, Write};
 use std::{error, fmt, result};
 use std::sync::RwLock;
+use std::time::{SystemTime, UNIX_EPOCH};
 
+// This logger will write logs into a file on disk
 struct FileLogger {
-    log_level: Level,
+    level: Level,
     writer: RwLock<BufWriter<File>>,
 }
 
 impl log::Log for FileLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= self.log_level
+        // Check if the logger is enabled for a certain log level
+        // Here, you could also add own custom filtering based on targets or regex
+        metadata.level() <= self.level
     }
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            let mut writer = self.writer.write().expect("To do: Add error message");
-            write!(writer, "ayy").expect("To do: Add error message");
+            let mut writer = self.writer
+                .write()
+                .expect("Failed to unlock log file writer in write mode");
+            let now = SystemTime::now();
+            let timestamp = now.duration_since(UNIX_EPOCH).expect(
+                "Failed to generate timestamp: This system is operating before the unix epoch",
+            );
+            // Write the log into the buffer
+            write!(
+                writer,
+                "{} {} at {}: {}\n",
+                record.level(),
+                timestamp.as_secs(),
+                record.target(),
+                record.args()
+            ).expect("Failed to log to file");
         }
+        self.flush();
     }
 
     fn flush(&self) {
-        // To do: Find out if and when we need this
+        // Write the buffered logs to disk
         self.writer
             .write()
-            .expect("To do: Add error message")
+            .expect("Failed to unlock log file writer in write mode")
             .flush()
-            .expect("To do: Add error message");
+            .expect("Failed to flush log file writer");
     }
 }
 
 impl FileLogger {
     // A convenience method to set everything up nicely
-    fn init(log_level: Level) -> Result<()> {
+    fn init(level: Level, file_name: &str) -> Result<()> {
         let file = OpenOptions::new()
             .create(true)
             .append(true)
-            .open("log.txt")?;
+            .open(file_name)?;
         let writer = RwLock::new(BufWriter::new(file));
-        let logger = FileLogger { log_level, writer };
+        let logger = FileLogger { level, writer };
+        // set the global level filter that log uses to optimize ignored logs
+        log::set_max_level(level.to_level_filter());
+        // set this logger as the one used by the log macros
         log::set_boxed_logger(Box::new(logger))?;
         Ok(())
     }
 }
 
-// Our custom error for our logger
+// Our custom error for our FileLogger
 #[derive(Debug)]
 enum FileLoggerError {
     Io(io::Error),
@@ -95,6 +117,11 @@ impl From<log::SetLoggerError> for FileLoggerError {
 
 
 fn main() {
-    FileLogger::init(Level::Warn).expect("Failed to init FileLogger");
-    warn!("ayy");
+    FileLogger::init(Level::Info, "log.txt").expect("Failed to init FileLogger");
+    trace!("Beginning the operation");
+    info!("A lightning strikes a body");
+    warn!("It's moving");
+    error!("It's alive!");
+    debug!("Dr. Frankenstein now knows how it feels to be god");
+    trace!("End of the operation");
 }
