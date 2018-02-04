@@ -115,7 +115,6 @@ impl From<log::SetLoggerError> for FileLoggerError {
     }
 }
 
-
 fn main() {
     FileLogger::init(Level::Info, "log.txt").expect("Failed to init FileLogger");
     trace!("Beginning the operation");
