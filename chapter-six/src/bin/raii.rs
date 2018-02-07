@@ -82,6 +82,6 @@ fn main() {
         // we can use it as if it was the underlying data
         println!("The string behind foo is {} characters long", bar.len());
 
-        // foo is automatilly unlocked when we exit this scope
+        // foo is automatically unlocked when we exit this scope
     }
 }
