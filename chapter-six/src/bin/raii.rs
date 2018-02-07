@@ -84,4 +84,5 @@ fn main() {
 
         // foo is automatically unlocked when we exit this scope
     }
+    // foo could now be unlocked again if needed
 }
