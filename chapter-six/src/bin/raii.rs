@@ -54,7 +54,6 @@ impl<T> SomeOsFunctionality<T> {
     }
 }
 
-
 // Automatically unlock the underlying resource on drop
 impl<'a, T> Drop for SomeOsFunctionalityGuard<'a, T> {
     fn drop(&mut self) {
