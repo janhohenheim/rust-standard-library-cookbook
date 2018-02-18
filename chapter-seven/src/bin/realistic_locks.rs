@@ -39,7 +39,7 @@ impl ConnectionHandler {
     }
 
     fn add_connection(&self, ip: Ipv6Addr) -> usize {
-        let mut last = self.next_id.fetch_add(1, Ordering::SeqCst);
+        let last = self.next_id.fetch_add(1, Ordering::SeqCst);
         self.clients
             .write()
             .expect("Failed to lock clients for writing")
@@ -66,7 +66,7 @@ fn main() {
         let ten_millis = time::Duration::from_millis(10);
         thread::spawn(move || {
             for _ in 0..20 {
-                let id = connections.add_connection(dummy_ip);
+                connections.add_connection(dummy_ip);
                 thread::sleep(ten_millis);
             }
         })
