@@ -23,7 +23,7 @@ fn main() {
 
     // The reader_b thread will print the current content of
     // our resource fourty times as well. Because RwLock allows
-    // multiple reader, it will execute at the same time as reader_a
+    // multiple readers, it will execute at the same time as reader_a
     let reader_b = {
         let resource = resource.clone();
         thread::spawn(move || {
