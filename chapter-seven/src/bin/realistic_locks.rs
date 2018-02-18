@@ -66,6 +66,7 @@ fn main() {
             }
         })
     };
+
     let disconnector = {
         let connections = connections.clone();
         let fifty_millis = time::Duration::from_millis(50);
