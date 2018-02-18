@@ -4,11 +4,15 @@ use std::collections::HashMap;
 use std::{thread, time};
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
 
+// Client holds whatever state your client might have
 struct Client {
     ip: Ipv6Addr,
 }
 
+// ConnectionHandler manages a list of connections
+// in a parallelly safe way
 struct ConnectionHandler {
+    // The clients are identified by a unique key
     clients: RwLock<HashMap<usize, Client>>,
     next_id: AtomicUsize,
 }
@@ -55,6 +59,7 @@ impl ConnectionHandler {
 fn main() {
     let connections = Arc::new(ConnectionHandler::new());
 
+    // the connector thread will add a new connection every now and then
     let connector = {
         let connections = connections.clone();
         let dummy_ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff);
@@ -67,6 +72,7 @@ fn main() {
         })
     };
 
+    // the disconnector thread will remove the third connection at some point
     let disconnector = {
         let connections = connections.clone();
         let fifty_millis = time::Duration::from_millis(50);
@@ -76,6 +82,7 @@ fn main() {
         })
     };
 
+    // The main thread will print the active connections in a short interval
     let five_millis = time::Duration::from_millis(5);
     for _ in 0..40 {
         let count = connections.client_count();
