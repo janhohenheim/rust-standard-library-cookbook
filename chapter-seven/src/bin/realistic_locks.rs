@@ -10,7 +10,7 @@ struct Client {
 
 struct ConnectionHandler {
     clients: RwLock<HashMap<usize, Client>>,
-    last_id: AtomicUsize,
+    next_id: AtomicUsize,
 }
 
 impl Client {
@@ -23,7 +23,7 @@ impl ConnectionHandler {
     fn new() -> Self {
         ConnectionHandler {
             clients: RwLock::new(HashMap::new()),
-            last_id: ATOMIC_USIZE_INIT,
+            next_id: ATOMIC_USIZE_INIT,
         }
     }
 
@@ -35,8 +35,7 @@ impl ConnectionHandler {
     }
 
     fn add_connection(&self, ip: Ipv6Addr) -> usize {
-        let mut last = self.last_id.fetch_add(1, Ordering::SeqCst);
-        last += 1;
+        let mut last = self.next_id.fetch_add(1, Ordering::SeqCst);
         self.clients
             .write()
             .expect("Failed to lock clients for writing")
