@@ -97,7 +97,8 @@ fn main() {
 }
 
 // NaiveMutex is an easy, albeit very suboptimal,
-// implementation of a Mutex, similar to std::sync::Mutex
+// implementation of a Mutex ("Mutual Exclusion"), similar to std::sync::Mutex
+// A mutex is a lock that only allows one thread to access a ressource at all times
 pub struct NaiveMutex<T> {
     locked: AtomicBool,
     // UnsafeCell is the underlying struct of every
