@@ -54,9 +54,5 @@ fn main() {
     // It will block the current thread until a message is available
     for msg in rx {
         println!("received: {}", msg);
-        // Manually break the thread so our program doesn't run forever
-        if msg == DISCONNECT {
-            break;
-        }
     }
 }
