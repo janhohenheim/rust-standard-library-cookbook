@@ -8,7 +8,7 @@ use std::sync::mpsc::channel;
 fn main() {
     // channel() creates a connected pair of a sender and a receiver.
     // They are usually called tx and rx, which stand for
-    // "transmission" and "receiving"
+    // "transmission" and "reception"
     let (tx, rx) = channel();
     for i in 0..10 {
         // Because an mpsc channel is "Multi-producer",
