@@ -59,6 +59,4 @@ fn main() {
             break;
         }
     }
-
-    sender.join().expect("The sender thread panicked");
 }
