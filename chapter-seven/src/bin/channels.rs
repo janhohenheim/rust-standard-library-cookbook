@@ -31,7 +31,7 @@ fn main() {
     const DISCONNECT: &str = "Goodbye!";
     // The following thread will send random messages
     // until a goodbye message was sent
-    let sender = thread::spawn(move || {
+    thread::spawn(move || {
         let mut rng = rand::thread_rng();
         loop {
             let msg = match rng.gen_range(0, 5) {
