@@ -143,7 +143,7 @@ impl<'a, T> Drop for NaiveMutexGuard<'a, T> {
 impl<'a, T> Deref for NaiveMutexGuard<'a, T> {
     type Target = T;
     fn deref(&self) -> &T {
-        unsafe { &mut *self.naive_mutex.data.get() }
+        unsafe { &*self.naive_mutex.data.get() }
     }
 }
 
