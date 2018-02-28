@@ -1,42 +1,6 @@
 #![feature(generators, generator_trait, conservative_impl_trait)]
 use std::ops::{Generator, GeneratorState};
 
-pub fn gen_to_iter<A, G: Generator<Return = (), Yield = A>>(gen: G) -> impl Iterator<Item = A> {
-    GeneratorIter {
-        state: GeneratorIterState::Pending,
-        gen,
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct GeneratorIter<G> {
-    state: GeneratorIterState,
-    gen: G,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-enum GeneratorIterState {
-    Pending,
-    Empty,
-}
-
-impl<G: Generator<Return = ()>> Iterator for GeneratorIter<G> {
-    type Item = G::Yield;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self.state {
-            GeneratorIterState::Empty => None,
-            GeneratorIterState::Pending => match self.gen.resume() {
-                GeneratorState::Yielded(value) => Some(value),
-                GeneratorState::Complete(_) => {
-                    self.state = GeneratorIterState::Empty;
-                    None
-                }
-            },
-        }
-    }
-}
-
 fn main() {
     let mut generator = || {
         yield 1;
@@ -57,7 +21,7 @@ fn main() {
 }
 
 fn fibonacci() -> impl Iterator<Item = u32> {
-    gen_to_iter(move || {
+    || {
         let mut curr = 0;
         let mut next = 1;
         loop {
@@ -66,5 +30,5 @@ fn fibonacci() -> impl Iterator<Item = u32> {
             curr = next;
             next += old;
         }
-    })
+    }
 }
