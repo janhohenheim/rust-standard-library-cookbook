@@ -5,7 +5,7 @@ pub fn slow_fibonacci_recursive(n: u32) -> u32 {
     match n {
         0 => 0,
         1 => 1,
-        _ => slow_fibonacci_recursive(n - 1) + slow_fibonacci_recursive(n - 2)
+        _ => slow_fibonacci_recursive(n - 1) + slow_fibonacci_recursive(n - 2),
     }
 }
 
