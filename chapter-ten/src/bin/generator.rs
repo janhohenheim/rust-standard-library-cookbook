@@ -1,12 +1,12 @@
 #![feature(generators, generator_trait, conservative_impl_trait)]
 
 use std::ops::{Generator, GeneratorState};
-struct GeneratorIterator<G>(G);
-impl<G> Iterator for GeneratorIterator<G>
+struct GeneratorIterator<T>(T);
+impl<T> Iterator for GeneratorIterator<T>
 where
-    G: Generator<Return = ()>,
+    T: Generator<Return = ()>,
 {
-    type Item = G::Yield;
+    type Item = T::Yield;
     fn next(&mut self) -> Option<Self::Item> {
         match self.0.resume() {
             GeneratorState::Yielded(value) => Some(value),
