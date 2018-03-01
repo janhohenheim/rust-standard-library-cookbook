@@ -12,11 +12,12 @@ pub fn slow_fibonacci_recursive(n: u32) -> u32 {
 pub fn fast_fibonacci_recursive(n: u32) -> u32 {
     fn inner(n: u32, penultimate: u32, last: u32) -> u32 {
         match n {
-            0 => last,
+            0 => penultimate,
+            1 => last,
             _ => inner(n - 1, last, penultimate + last),
         }
     }
-    inner(n - 1, 0, 1)
+    inner(n, 0, 1)
 }
 
 pub fn fibonacci_imperative(n: u32) -> u32 {
