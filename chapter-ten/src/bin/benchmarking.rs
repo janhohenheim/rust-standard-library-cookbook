@@ -10,13 +10,13 @@ pub fn slow_fibonacci_recursive(n: u32) -> u32 {
 }
 
 pub fn fast_fibonacci_recursive(n: u32) -> u32 {
-    fn inner(n: u32, acc1: u32, acc2: u32) -> u32 {
+    fn inner(n: u32, penultimate: u32, last: u32) -> u32 {
         match n {
-            0 => acc1,
-            _ => inner(n - 1, acc2, acc1 + acc2),
+            0 => last,
+            _ => inner(n - 1, last, penultimate + last),
         }
     }
-    inner(n - 1, 1, 1)
+    inner(n - 1, 0, 1)
 }
 
 pub fn fibonacci_imperative(n: u32) -> u32 {
@@ -24,13 +24,13 @@ pub fn fibonacci_imperative(n: u32) -> u32 {
         0 => 0,
         1 => 1,
         _ => {
-            let mut erelast_fib;
-            let mut last_fib = 1;
+            let mut penultimate;
+            let mut last = 1;
             let mut fib = 0;
             for _ in 0..n {
-                erelast_fib = last_fib;
-                last_fib = fib;
-                fib = erelast_fib + last_fib;
+                penultimate = last;
+                last = fib;
+                fib = penultimate + last;
             }
             fib
         }
