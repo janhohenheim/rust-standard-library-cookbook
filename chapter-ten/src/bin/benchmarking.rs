@@ -1,4 +1,6 @@
 #![feature(test)]
+// The test crate was primarily designed for
+// the Rust compiler itself, so it has no stability guaranteed
 extern crate test;
 
 pub fn slow_fibonacci_recursive(n: u32) -> u32 {
@@ -43,9 +45,13 @@ mod tests {
     use super::*;
     use test::Bencher;
 
+    // Functions annotated with the bench attribute will
+    // undergo a performance evaluation when running "cargo bench"
     #[bench]
     fn bench_slow_fibonacci_recursive(b: &mut Bencher) {
         b.iter(|| {
+            // test::block_box is "black box" for the compiler and LLVM
+            // Telling them to not optimize a variable away
             let n = test::black_box(20);
             slow_fibonacci_recursive(n)
         });
