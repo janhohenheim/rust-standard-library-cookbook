@@ -1,12 +1,22 @@
 #![feature(test)]
 extern crate test;
 
-pub fn fibonacci_recursive(n: u32) -> u32 {
+pub fn slow_fibonacci_recursive(n: u32) -> u32 {
     match n {
         0 => 0,
         1 => 1,
-        _ => fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2)
+        _ => slow_fibonacci_recursive(n - 1) + slow_fibonacci_recursive(n - 2)
     }
+}
+
+pub fn fast_fibonacci_recursive(n: u32) -> u32 {
+    fn inner(n: u32, acc1: u32, acc2: u32) -> u32 {
+        match n {
+            0 => acc1,
+            _ => inner(n - 1, acc2, acc1 + acc2),
+        }
+    }
+    inner(n - 1, 1, 1)
 }
 
 pub fn fibonacci_imperative(n: u32) -> u32 {
@@ -33,10 +43,18 @@ mod tests {
     use test::Bencher;
 
     #[bench]
-    fn bench_fibonacci_recursive(b: &mut Bencher) {
+    fn bench_slow_fibonacci_recursive(b: &mut Bencher) {
         b.iter(|| {
             let n = test::black_box(20);
-            fibonacci_recursive(n)
+            slow_fibonacci_recursive(n)
+        });
+    }
+
+    #[bench]
+    fn bench_fast_fibonacci_recursive(b: &mut Bencher) {
+        b.iter(|| {
+            let n = test::black_box(20);
+            fast_fibonacci_recursive(n)
         });
     }
 
