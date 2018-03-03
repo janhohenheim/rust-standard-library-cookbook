@@ -11,4 +11,12 @@ fn main() {
     let some_data = ["Andrei", "Romania", "Giuseppe", "Italy", "Susan", "Britain"];
     let countries: Vec<_> = some_data.iter().skip(1).step_by(2).collect();
     println!("Countries in the data: {:?}", countries);
+
+    let grouped_stream = "Aaron 182cm 70kg Alice 160cm 90kg Bob 197cm 83kg";
+    let weights: Vec<_> = grouped_stream
+        .split_whitespace()
+        .skip(2)
+        .step_by(3)
+        .collect();
+    println!("The weights of the people are: {:?}", weights);
 }
