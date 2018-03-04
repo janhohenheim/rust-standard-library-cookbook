@@ -1,6 +1,6 @@
-fn main() {
-    use std::thread;
+use std::thread;
 
+fn main() {
     // Spawning a thread lets it execute a lambda
     let child = thread::spawn(|| println!("Hello from a new thread!"));
     println!("Hello from the main thread!");
@@ -13,12 +13,9 @@ fn main() {
     println!("The sum of the numbers 1 to 10 is {}", sum);
 }
 
-
 // We are going to write a function that
 // sums the numbers in a slice in parallel
 fn parallel_sum(range: &[i32]) -> i32 {
-    use std::thread;
-
     // We are going to use exactly 4 threads to sum the numbers
     const NUM_THREADS: usize = 4;
 
