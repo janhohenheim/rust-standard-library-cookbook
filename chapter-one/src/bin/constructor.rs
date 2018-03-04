@@ -2,7 +2,7 @@ fn main() {
     // We don't need to care about
     // the internal structure of NameLength
     // Instead, we can just call it's constructor
-    let name_length = NameLength::new("John".to_string());
+    let name_length = NameLength::new("John");
 
     // Prints "The name 'John' is '4' characters long"
     name_length.print();
@@ -16,10 +16,10 @@ struct NameLength {
 impl NameLength {
     // The user doesn't need to setup length
     // We do it for him!
-    fn new(name: String) -> Self {
+    fn new(name: &str) -> Self {
         NameLength {
             length: name.len(),
-            name,
+            name.to_string(),
         }
     }
 
