@@ -7,7 +7,7 @@ fn main() {
         println!("- {}", arg);
     }
 
-    // We can access specific parameters over the iterator API...
+    // We can access specific parameters using the iterator API
     let mut args = env::args();
     if let Some(arg) = args.nth(0) {
         println!("The path to this program is: {}", arg);
