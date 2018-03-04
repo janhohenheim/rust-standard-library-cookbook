@@ -8,7 +8,7 @@ use flate2::write::ZlibEncoder;
 use flate2::read::ZlibDecoder;
 
 use std::fs::{File, OpenOptions};
-use std::io::{BufReader, BufWriter, Read, Write};
+use std::io::{BufReader, BufWriter, Read};
 
 fn main() {
     let bytes = b"I have a dream that one day this nation will rise up, \
@@ -25,6 +25,9 @@ fn main() {
     let original = File::open("ferris.png").expect("Failed to open file");
     let mut original_reader = BufReader::new(original);
 
+    // Compress it
+    let data = encode_file(&mut original_reader).expect("Failed to encode file");
+
     // Write compressed file to disk
     let encoded = OpenOptions::new()
         .read(true)
@@ -34,9 +37,9 @@ fn main() {
         .expect("Failed to create encoded file");
     let mut encoded_reader = BufReader::new(&encoded);
     let mut encoded_writer = BufWriter::new(&encoded);
-
-    // Compress it
-    encode_file(&mut original_reader, &mut encoded_writer).expect("Failed to encode file");
+    encoded_writer
+        .write_all(&data)
+        .expect("Failed to write encoded file");
 
 
     // Jump back to the beginning of the compressed file
@@ -70,13 +73,12 @@ fn decode_bytes(bytes: &[u8]) -> io::Result<Vec<u8>> {
 }
 
 
-fn encode_file(file: &mut Read, target: &mut Write) -> io::Result<()> {
+fn encode_file(file: &mut Read) -> io::Result<Vec<u8>> {
     // Files have a built-in encoder
     let mut encoded = file.zlib_encode(Compression::Best);
-
-    io::copy(&mut encoded, target)?;
-
-    Ok(())
+    let mut buffer = Vec::new();
+    encoded.read_to_end(&mut buffer)?;
+    Ok(buffer)
 }
 
 fn decode_file(file: &mut Read) -> io::Result<Vec<u8>> {
