@@ -32,7 +32,6 @@ fn main() {
         println!("But I changed my mind, it's now {} out of 10", rating);
     }
 
-
     // Remove a key and its value
     let removed_value = tv_ratings.remove("The IT Crowd");
     if let Some(removed_value) = removed_value {
@@ -52,11 +51,9 @@ fn main() {
         println!("{}\t: {}", key, value);
     }
 
-    // Iterating without calling referencing the hashmap
-    // moves the moves its contents
+    // Iterating without referencing the HashMap moves its contents
     for _ in tv_ratings {}
     // tv_ratings is not usable anymore
-
 
     // Like with the other collections, you can preallocate a size
     // to gain some performance
@@ -84,7 +81,6 @@ fn main() {
         *age += 10;
         println!("{}", age);
     }
-
 
     // Use the entry API to assign defaults
     // for values that are not yet in the HashMap
