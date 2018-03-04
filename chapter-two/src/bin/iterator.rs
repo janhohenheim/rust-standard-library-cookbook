@@ -23,7 +23,6 @@ fn main() {
         println!("#{}. letter in the alphabet: {}", index + 1, letter);
     }
 
-
     // going through an iterator, step by step
     if let Some(name) = iter.next() {
         println!("First name: {}", name);
@@ -82,7 +81,6 @@ fn main() {
     let nums: Vec<_> = all_nums.take(5).collect();
     println!("The first five numbers are: {:?}", nums);
 
-
     // Skip the first few items
     let nums: Vec<_> = (0..11).skip(2).collect();
     println!("The last 8 letters in a range from zero to 10: {:?}", nums);
@@ -100,16 +98,9 @@ fn main() {
     let names: Vec<_> = names.iter().skip_while(|x| x.starts_with('A')).collect();
     println!("Names that don't start with 'A': {:?}", names);
 
-
     // Filtering iterators
     let countries = [
-        "U.S.A.",
-        "Germany",
-        "France",
-        "Italy",
-        "India",
-        "Pakistan",
-        "Burma",
+        "U.S.A.", "Germany", "France", "Italy", "India", "Pakistan", "Burma"
     ];
     let countries_with_i: Vec<_> = countries
         .iter()
@@ -153,8 +144,7 @@ fn main() {
         "When operating on the first ten positive numbers\n\
          their sum is {} and\n\
          their product is {}.",
-        sum,
-        product
+        sum, product
     );
 
     let max = (1..11).max();
@@ -166,8 +156,6 @@ fn main() {
         println!("They have a smallest number, and it is {}", min);
     }
 
-
-
     // Combine iterators
 
     // Combine an iterator with itself, making it infinite
@@ -177,8 +165,8 @@ fn main() {
     println!("some_numbers: {:?}", some_numbers);
 
     // Combine two iterators by putting them after another
-    let some_numbers_and_letters: Vec<_> = (1..4).chain(10..14).collect();
-    println!("some_numbers_and_letters: {:?}", some_numbers_and_letters);
+    let some_numbers: Vec<_> = (1..4).chain(10..14).collect();
+    println!("some_numbers: {:?}", some_numbers);
 
     // Zip two iterators together by grouping their first items
     // together, their second items together, etc.
@@ -194,7 +182,6 @@ fn main() {
         .map(|(ch, num)| (ch as char, num))
         .collect();
     println!("zipped: {:?}", zipped);
-
 
     // Apply functions to all items
 
