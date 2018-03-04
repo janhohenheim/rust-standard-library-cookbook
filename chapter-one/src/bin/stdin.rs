@@ -13,9 +13,7 @@ fn main() {
 
     println!(
         "Hello, {} year old human named {} {}!",
-        age,
-        forename,
-        surname
+        age, forename, surname
     );
 }
 
@@ -34,6 +32,8 @@ fn read_line_iter() -> String {
     input
         .expect("No lines in buffer")
         .expect("Failed to read line")
+        .trim()
+        .to_string()
 }
 
 fn read_line_buffer() -> String {
@@ -42,7 +42,7 @@ fn read_line_buffer() -> String {
     io::stdin()
         .read_line(&mut input)
         .expect("Failed to read line");
-    input
+    input.trim().to_string()
 }
 
 fn read_number() -> i32 {
@@ -52,7 +52,7 @@ fn read_number() -> i32 {
         for line in stdin.lock().lines() {
             let input = line.expect("Failed to read line");
             // Try to convert a string into a number
-            match input.parse::<i32>() {
+            match input.trim().parse::<i32>() {
                 Ok(num) => return num,
                 Err(e) => println!("Failed to read number: {}", e),
             }
