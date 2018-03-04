@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 
 #[derive(Debug)]
+// This is going to be our custom Error type
 enum AgeReaderError {
     Io(io::Error),
     Parse(num::ParseIntError),
@@ -11,7 +12,6 @@ enum AgeReaderError {
 
 // It is common to alias Result in an Error module
 type Result<T> = result::Result<T, AgeReaderError>;
-
 
 impl error::Error for AgeReaderError {
     fn description(&self) -> &str {
@@ -45,7 +45,6 @@ impl fmt::Display for AgeReaderError {
     }
 }
 
-
 // Implement From<T> for every sub-error
 impl From<io::Error> for AgeReaderError {
     fn from(err: io::Error) -> AgeReaderError {
@@ -59,7 +58,6 @@ impl From<num::ParseIntError> for AgeReaderError {
     }
 }
 
-
 fn main() {
     // Assuming a file called age.txt exists
     const FILENAME: &str = "age.txt";
@@ -69,8 +67,7 @@ fn main() {
         Err(AgeReaderError::Io(err)) => eprintln!("Failed to open the file {}: {}", FILENAME, err),
         Err(AgeReaderError::Parse(err)) => eprintln!(
             "Failed to read the contents of {} as a number: {}",
-            FILENAME,
-            err
+            FILENAME, err
         ),
         Err(AgeReaderError::NegativeAge()) => eprintln!("The age in the file is negative"),
     }
