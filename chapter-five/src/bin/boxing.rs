@@ -8,7 +8,7 @@ use std::fmt::Debug;
 #[derive(Debug)]
 struct Node<T> {
     data: T,
-    subnodes: Option<(BoxedNode<T>, BoxedNode<T>)>,
+    child_nodes: Option<(BoxedNode<T>, BoxedNode<T>)>,
 }
 type BoxedNode<T> = Box<Node<T>>;
 
@@ -16,23 +16,22 @@ impl<T> Node<T> {
     fn new(data: T) -> Self {
         Node {
             data,
-            subnodes: None,
+            child_nodes: None,
         }
     }
 
     fn is_leaf(&self) -> bool {
-        self.subnodes.is_none()
+        self.child_nodes.is_none()
     }
 
-    fn add_subnodes(&mut self, a: Node<T>, b: Node<T>) {
+    fn add_child_nodes(&mut self, a: Node<T>, b: Node<T>) {
         assert!(
             self.is_leaf(),
-            "Tried to add subnodes to a node that is not a leaf"
+            "Tried to add child_nodes to a node that is not a leaf"
         );
-        self.subnodes = Some((Box::new(a), Box::new(b)));
+        self.child_nodes = Some((Box::new(a), Box::new(b)));
     }
 }
-
 
 // Boxes enable you to use traditional OOP polymorph
 trait Animal: Debug {
@@ -57,12 +56,12 @@ impl Animal for Cat {
 
 fn main() {
     let mut root = Node::new(12);
-    root.add_subnodes(Node::new(3), Node::new(-24));
-    root.subnodes
+    root.add_child_nodes(Node::new(3), Node::new(-24));
+    root.child_nodes
         .as_mut()
         .unwrap()
         .0
-        .add_subnodes(Node::new(0), Node::new(1803));
+        .add_child_nodes(Node::new(0), Node::new(1803));
     println!("Our binary tree looks like this: {:?}", root);
 
     // Polymorphism
@@ -86,7 +85,6 @@ fn main() {
     let result = multiplier(3);
     println!("23 * 3 = {}", result);
 }
-
 
 // Via trait objects we can return any iterator
 fn caps_words_iter<'a>(text: &'a str) -> Box<Iterator<Item = String> + 'a> {
