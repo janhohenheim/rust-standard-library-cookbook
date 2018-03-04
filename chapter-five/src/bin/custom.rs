@@ -18,9 +18,8 @@ struct Britain;
 
 #[derive(HelloWorld)]
 // We can use an optional attribute to change the message
-#[HelloWorldName = "the Land Down Under"]
+#[hello_world_name = "the Land Down Under"]
 struct Australia;
-
 
 fn main() {
     Switzerland::hello_world();
