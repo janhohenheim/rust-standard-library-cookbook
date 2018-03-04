@@ -23,14 +23,10 @@ struct SomeOsFunctionalityGuard<'a, T: 'a> {
 
 impl SomeOsSpecificFunctionalityHandle {
     unsafe fn lock(&self) {
-        unsafe {
-            // Here goes the unsafe low level code
-        }
+        // Here goes the unsafe low level code
     }
     unsafe fn unlock(&self) {
-        unsafe {
-            // Here goes the unsafe low level code
-        }
+        // Here goes the unsafe low level code
     }
 }
 
