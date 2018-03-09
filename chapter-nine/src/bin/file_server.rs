@@ -3,7 +3,7 @@ extern crate hyper;
 
 use hyper::{Method, StatusCode};
 use hyper::server::{const_service, service_fn, Http, Request, Response};
-use hyper::header::{ContentLength, ContentType};
+use hyper::header::ContentLength;
 use std::net::SocketAddr;
 use std::thread;
 use futures::Future;
@@ -31,20 +31,20 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
 
 type ResponseFuture = Box<Future<Item = Response, Error = hyper::Error>>;
 fn handle_root(_: Request) -> ResponseFuture {
-    send_html("index.html")
+    send_file("index.html")
 }
 
 fn handle_get_file(req: Request) -> ResponseFuture {
-    send_html(req.path())
+    send_file(req.path())
 }
 
 fn handle_invalid_method(_: Request) -> ResponseFuture {
-    let response_future = send_html("invalid_method.html")
+    let response_future = send_file("invalid_method.html")
         .and_then(|response| Ok(response.with_status(StatusCode::MethodNotAllowed)));
     Box::new(response_future)
 }
 
-fn send_html(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
+fn send_file(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
     let path = path_on_disk(path);
     let (tx, rx) = oneshot::channel();
     thread::spawn(move || {
@@ -65,7 +65,6 @@ fn send_html(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
         match copy(&mut file, &mut buf) {
             Ok(_) => {
                 let res = Response::new()
-                    .with_header(ContentType::html())
                     .with_header(ContentLength(buf.len() as u64))
                     .with_body(buf);
                 tx.send(res).expect("Send error on successful file read");
