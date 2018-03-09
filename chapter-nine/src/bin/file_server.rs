@@ -4,10 +4,10 @@ extern crate hyper;
 use hyper::{Method, StatusCode};
 use hyper::server::{const_service, service_fn, Http, Request, Response};
 use hyper::header::ContentLength;
-use std::net::SocketAddr;
-use std::thread;
 use futures::Future;
 use futures::sync::oneshot;
+use std::net::SocketAddr;
+use std::thread;
 use std::fs::File;
 use std::io::{self, copy};
 
