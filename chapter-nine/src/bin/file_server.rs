@@ -106,7 +106,7 @@ fn try_to_send_file(file: &str) -> ResponseResultFuture {
                 println!("Sending file: {}", path);
                 // Detect the content type by checking the file extension
                 // or fall back to plaintext
-                let content_type = get_content_type(&path).unwrap_or(ContentType::plaintext());
+                let content_type = get_content_type(&path).unwrap_or_else(ContentType::plaintext);
                 let res = Response::new()
                     .with_header(ContentLength(buf.len() as u64))
                     .with_header(content_type)
