@@ -3,7 +3,8 @@ extern crate hyper;
 
 use hyper::{Method, StatusCode};
 use hyper::server::{const_service, service_fn, Http, Request, Response};
-use hyper::header::ContentLength;
+use hyper::header::{ContentLength, ContentType};
+use hyper::mime;
 use futures::Future;
 use futures::sync::oneshot;
 use std::net::SocketAddr;
@@ -77,8 +78,10 @@ fn try_to_send_file(path: &str) -> ResponseResultFuture {
         match copy(&mut file, &mut buf) {
             Ok(_) => {
                 println!("Sending file: {}", path);
+                let content_type = get_content_type(&path).unwrap_or(ContentType::plaintext());
                 let res = Response::new()
                     .with_header(ContentLength(buf.len() as u64))
+                    .with_header(content_type)
                     .with_body(buf);
                 tx.send(Ok(res))
                     .expect("Send error on successful file read");
@@ -106,4 +109,15 @@ fn send_404() -> ResponseFuture {
         }))
     });
     Box::new(response_future)
+}
+
+fn get_content_type(file: &str) -> Option<ContentType> {
+    let pos = file.rfind('.')? + 1;
+    let mime_type = match &file[pos..] {
+        "txt" => mime::TEXT_PLAIN_UTF_8,
+        "html" => mime::TEXT_HTML_UTF_8,
+        "css" => mime::TEXT_CSS,
+        _ => return None,
+    };
+    Some(ContentType(mime_type))
 }
