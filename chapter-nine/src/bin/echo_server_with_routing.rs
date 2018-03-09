@@ -4,6 +4,7 @@ use hyper::{Method, StatusCode};
 use hyper::server::{const_service, service_fn, Http, Request, Response};
 use hyper::header::{ContentLength, ContentType};
 use std::net::SocketAddr;
+
 fn main() {
     let addr = "[::1]:3000".parse().expect("Failed to parse address");
     run_echo_server(&addr).expect("Failed to run webserver");
@@ -20,7 +21,7 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
         }
     }));
 
-    let server = Http::new().bind(&addr, echo)?;
+    let server = Http::new().bind(addr, echo)?;
     server.run()
 }
 
