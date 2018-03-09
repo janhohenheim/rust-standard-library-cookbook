@@ -19,9 +19,9 @@ fn main() {
 fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
     let echo = const_service(service_fn(|req: Request| {
         match (req.method(), req.path()) {
-            (&Method::Get, "/") => handle_root(req),
-            (&Method::Get, _) => handle_get_file(req),
-            _ => handle_invalid_method(req),
+            (&Method::Get, "/") => handle_root(),
+            (&Method::Get, file) => handle_get_file(file),
+            _ => handle_invalid_method(),
         }
     }));
 
@@ -30,34 +30,41 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
 }
 
 type ResponseFuture = Box<Future<Item = Response, Error = hyper::Error>>;
-fn handle_root(_: Request) -> ResponseFuture {
-    send_file("index.html")
+fn handle_root() -> ResponseFuture {
+    send_file_or_404("index.html")
 }
 
-fn handle_get_file(req: Request) -> ResponseFuture {
-    send_file(req.path())
+fn handle_get_file(file: &str) -> ResponseFuture {
+    send_file_or_404(file)
 }
 
-fn handle_invalid_method(_: Request) -> ResponseFuture {
-    let response_future = send_file("invalid_method.html")
+fn handle_invalid_method() -> ResponseFuture {
+    let response_future = send_file_or_404("invalid_method.html")
         .and_then(|response| Ok(response.with_status(StatusCode::MethodNotAllowed)));
     Box::new(response_future)
 }
 
-fn send_file(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
+fn send_file_or_404(path: &str) -> ResponseFuture {
+    let not_found_future = try_to_send_file("not_found.html").and_then(|response_result| {
+        Ok(response_result.unwrap_or(Response::new().with_status(StatusCode::NotFound)))
+    });
+
+    let file_send_future = try_to_send_file(path)
+        .and_then(|response_result| response_result.map_err(|error| error.into()))
+        .or_else(|_| not_found_future);
+
+    Box::new(file_send_future)
+}
+
+type ResponseResultFuture = Box<Future<Item = Result<Response, io::Error>, Error = hyper::Error>>;
+fn try_to_send_file(path: &str) -> ResponseResultFuture {
     let path = path_on_disk(path);
     let (tx, rx) = oneshot::channel();
     thread::spawn(move || {
         let mut file = match File::open(path) {
             Ok(file) => file,
-            Err(_) => {
-                const ERROR_MSG: &[u8] = b"Error 404 (File Not Found)\n";
-                tx.send(
-                    Response::new()
-                        .with_status(StatusCode::NotFound)
-                        .with_header(ContentLength(ERROR_MSG.len() as u64))
-                        .with_body(ERROR_MSG),
-                ).expect("Send error on open");
+            Err(err) => {
+                tx.send(Err(err)).expect("Send error on file not found");
                 return;
             }
         };
@@ -67,11 +74,11 @@ fn send_file(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
                 let res = Response::new()
                     .with_header(ContentLength(buf.len() as u64))
                     .with_body(buf);
-                tx.send(res).expect("Send error on successful file read");
+                tx.send(Ok(res))
+                    .expect("Send error on successful file read");
             }
-            Err(_) => {
-                tx.send(Response::new().with_status(StatusCode::InternalServerError))
-                    .expect("Send error on error reading file");
+            Err(err) => {
+                tx.send(Err(err)).expect("Send error on error reading file");
             }
         };
     });
