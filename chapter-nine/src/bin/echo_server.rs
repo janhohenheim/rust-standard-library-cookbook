@@ -1,28 +1,23 @@
 extern crate hyper;
 
 use hyper::{Method, StatusCode};
-use hyper::server::{Http, Request, Response};
-
-use hyper::server::{const_service, service_fn};
+use hyper::server::{const_service, service_fn, Http, Request, Response};
+use hyper::header::{ContentLength, ContentType};
 
 fn main() {
-    let addr = "127.0.0.1:3000".parse().unwrap();
+    let addr = "[::1]:3000".parse().expect("Failed to parse address");
     let echo = const_service(service_fn(|req: Request| {
-        let mut response: Response<hyper::Body> = Response::new();
-
-        match (req.method(), req.path()) {
+        Ok(match (req.method(), req.path()) {
             (&Method::Get, "/") => {
-                response.set_body("Try POSTing data to /echo");
+                const ERR_MSG: &str = "Try doing a POST at /echo";
+                Response::<hyper::Body>::new()
+                    .with_header(ContentType::plaintext())
+                    .with_header(ContentLength(ERR_MSG.len() as u64))
+                    .with_body(ERR_MSG)
             }
-            (&Method::Post, "/echo") => {
-                response.set_body(req.body());
-            }
-            _ => {
-                response.set_status(StatusCode::NotFound);
-            }
-        };
-
-        Ok(response)
+            (&Method::Post, "/echo") => Response::<hyper::Body>::new().with_body(req.body()),
+            _ => Response::<hyper::Body>::new().with_status(StatusCode::NotFound),
+        })
     }));
     let server = Http::new().bind(&addr, echo).unwrap();
     server.run().unwrap();
