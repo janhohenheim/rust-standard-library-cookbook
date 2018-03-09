@@ -51,7 +51,7 @@ fn send_file(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
         let mut file = match File::open(path) {
             Ok(file) => file,
             Err(_) => {
-                const ERROR_MSG: &[u8] = b"Error 404 (File Not Found)";
+                const ERROR_MSG: &[u8] = b"Error 404 (File Not Found)\n";
                 tx.send(
                     Response::new()
                         .with_status(StatusCode::NotFound)
