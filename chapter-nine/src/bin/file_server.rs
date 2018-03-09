@@ -66,19 +66,6 @@ fn send_file_or_404(path: &str) -> ResponseFuture {
     Box::new(response_future)
 }
 
-fn sanitize_path(path: &str) -> String {
-    // Normalize the separators for the next steps
-    path.replace("\\", "/")
-        // Prevent the user from going up the filesystem
-        .replace("../", "")
-        // If the path comes straigh from the router, 
-        // it will begin with a slash
-        .trim_left_matches(|c| c == '/')
-        // Remove slashes at the end as we only serve files
-        .trim_right_matches(|c| c == '/')
-        .to_string()
-}
-
 // Return a requested file in a future of Result<Response, io::Error>
 // to indicate whether it exists or not
 type ResponseResultFuture = Box<Future<Item = Result<Response, io::Error>, Error = hyper::Error>>;
@@ -125,10 +112,6 @@ fn try_to_send_file(file: &str) -> ResponseResultFuture {
     Box::new(rx.map_err(|error| io::Error::new(io::ErrorKind::Other, error).into()))
 }
 
-fn path_on_disk(path_to_file: &str) -> String {
-    "files/".to_string() + path_to_file
-}
-
 fn send_404() -> ResponseFuture {
     // Try to send our 404 page
     let response_future = try_to_send_file("not_found.html").and_then(|response_result| {
@@ -142,6 +125,23 @@ fn send_404() -> ResponseFuture {
         }))
     });
     Box::new(response_future)
+}
+
+fn sanitize_path(path: &str) -> String {
+    // Normalize the separators for the next steps
+    path.replace("\\", "/")
+        // Prevent the user from going up the filesystem
+        .replace("../", "")
+        // If the path comes straigh from the router, 
+        // it will begin with a slash
+        .trim_left_matches(|c| c == '/')
+        // Remove slashes at the end as we only serve files
+        .trim_right_matches(|c| c == '/')
+        .to_string()
+}
+
+fn path_on_disk(path_to_file: &str) -> String {
+    "files/".to_string() + path_to_file
 }
 
 fn get_content_type(file: &str) -> Option<ContentType> {
