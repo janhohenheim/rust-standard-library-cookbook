@@ -45,15 +45,10 @@ fn handle_invalid_method() -> ResponseFuture {
 }
 
 fn send_file_or_404(path: &str) -> ResponseFuture {
-    let not_found_future = try_to_send_file("not_found.html").and_then(|response_result| {
-        Ok(response_result.unwrap_or(Response::new().with_status(StatusCode::NotFound)))
-    });
-
-    let file_send_future = try_to_send_file(path)
+    let response_future = try_to_send_file(path)
         .and_then(|response_result| response_result.map_err(|error| error.into()))
-        .or_else(|_| not_found_future);
-
-    Box::new(file_send_future)
+        .or_else(|_| send_404());
+    Box::new(response_future)
 }
 
 type ResponseResultFuture = Box<Future<Item = Result<Response, io::Error>, Error = hyper::Error>>;
@@ -87,4 +82,17 @@ fn try_to_send_file(path: &str) -> ResponseResultFuture {
 
 fn path_on_disk(path_to_file: &str) -> String {
     "files/".to_string() + path_to_file
+}
+
+fn send_404() -> ResponseFuture {
+    let response_future = try_to_send_file("not_found.html").and_then(|response_result| {
+        Ok(response_result.unwrap_or_else(|_| {
+            const ERROR_MSG: &str = "Failed to find \"File not found\" page. How ironic\n";
+            Response::new()
+                .with_status(StatusCode::NotFound)
+                .with_header(ContentLength(ERROR_MSG.len() as u64))
+                .with_body(ERROR_MSG)
+        }))
+    });
+    Box::new(response_future)
 }
