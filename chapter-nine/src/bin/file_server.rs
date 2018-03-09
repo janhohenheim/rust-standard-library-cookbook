@@ -20,7 +20,7 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
     let echo = const_service(service_fn(|req: Request| {
         match (req.method(), req.path()) {
             (&Method::Get, "/") => handle_root(),
-            (&Method::Get, file) => handle_get_file(file),
+            (&Method::Get, path) => handle_get_file(path),
             _ => handle_invalid_method(),
         }
     }));
@@ -45,10 +45,19 @@ fn handle_invalid_method() -> ResponseFuture {
 }
 
 fn send_file_or_404(path: &str) -> ResponseFuture {
-    let response_future = try_to_send_file(path)
+    let path = sanitize_path(path);
+    let response_future = try_to_send_file(&path)
         .and_then(|response_result| response_result.map_err(|error| error.into()))
         .or_else(|_| send_404());
     Box::new(response_future)
+}
+
+fn sanitize_path(path: &str) -> String {
+    path.replace("\\", "/")
+        .replace("../", "")
+        .trim_left_matches(|c| c == '/')
+        .trim_right_matches(|c| c == '/')
+        .to_string()
 }
 
 type ResponseResultFuture = Box<Future<Item = Result<Response, io::Error>, Error = hyper::Error>>;
@@ -56,9 +65,10 @@ fn try_to_send_file(path: &str) -> ResponseResultFuture {
     let path = path_on_disk(path);
     let (tx, rx) = oneshot::channel();
     thread::spawn(move || {
-        let mut file = match File::open(path) {
+        let mut file = match File::open(&path) {
             Ok(file) => file,
             Err(err) => {
+                println!("Failed to find file: {}", path);
                 tx.send(Err(err)).expect("Send error on file not found");
                 return;
             }
@@ -66,6 +76,7 @@ fn try_to_send_file(path: &str) -> ResponseResultFuture {
         let mut buf: Vec<u8> = Vec::new();
         match copy(&mut file, &mut buf) {
             Ok(_) => {
+                println!("Sending file: {}", path);
                 let res = Response::new()
                     .with_header(ContentLength(buf.len() as u64))
                     .with_body(buf);
