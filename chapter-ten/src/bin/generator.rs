@@ -26,7 +26,7 @@ fn main() {
         yield 100;
         yield 200;
         yield 300;
-        "I'm  a string"
+        "I'm a string"
     };
     loop {
         match generator.resume() {
