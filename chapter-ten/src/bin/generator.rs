@@ -21,7 +21,7 @@ fn main() {
     }
 
     // At the moment, you can return a different type
-    // than you yield, altough this feature is considered for removal
+    // than you yield, although this feature is considered for removal
     let mut generator = || {
         yield 100;
         yield 200;
