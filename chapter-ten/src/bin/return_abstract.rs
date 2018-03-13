@@ -36,7 +36,7 @@ fn create_animal() -> impl Animal {
 // Any iterator can be returned as an abstract return type
 fn caps_words_iter<'a>(text: &'a str) -> impl Iterator<Item = String> + 'a {
     // Return an iterator over every word converted into ALL_CAPS
-    Box::new(text.trim().split(' ').map(|word| word.to_uppercase()))
+    text.trim().split(' ').map(|word| word.to_uppercase())
 }
 
 // Same goes for closures
