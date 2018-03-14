@@ -15,9 +15,9 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
         // An easy way to implement routing is
         // to simply match the request's path
         match (req.method(), req.path()) {
-            (&Method::Get, "/") => handle_root(req),
+            (&Method::Get, "/") => handle_root(),
             (&Method::Post, "/echo") => handle_echo(req),
-            _ => handle_not_found(req),
+            _ => handle_not_found(),
         }
     }));
 
@@ -26,7 +26,7 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
 }
 
 type ResponseResult = Result<Response<hyper::Body>, hyper::Error>;
-fn handle_root(_: Request) -> ResponseResult {
+fn handle_root() -> ResponseResult {
     const MSG: &str = "Try doing a POST at /echo";
     Ok(Response::new()
         .with_header(ContentType::plaintext())
@@ -40,7 +40,7 @@ fn handle_echo(req: Request) -> ResponseResult {
     Ok(Response::new().with_body(req.body()))
 }
 
-fn handle_not_found(_: Request) -> ResponseResult {
+fn handle_not_found() -> ResponseResult {
     // Return a 404 for every unsupported route
     Ok(Response::new().with_status(StatusCode::NotFound))
 }
