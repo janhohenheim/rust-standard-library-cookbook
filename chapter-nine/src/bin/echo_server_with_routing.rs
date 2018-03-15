@@ -7,7 +7,7 @@ use std::net::SocketAddr;
 
 fn main() {
     let addr = "[::1]:3000".parse().expect("Failed to parse address");
-    run_echo_server(&addr).expect("Failed to run webserver");
+    run_echo_server(&addr).expect("Failed to run web server");
 }
 
 fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {

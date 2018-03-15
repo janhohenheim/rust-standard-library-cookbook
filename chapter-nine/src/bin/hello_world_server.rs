@@ -11,7 +11,7 @@ const MESSAGE: &str = "Hello World!";
 fn main() {
     // [::1] is the loopback address for IPv6, 3000 is a port
     let addr = "[::1]:3000".parse().expect("Failed to parse address");
-    run_with_service_function(&addr).expect("Failed to run webserver");
+    run_with_service_function(&addr).expect("Failed to run web server");
 }
 
 fn run_with_service_function(addr: &SocketAddr) -> Result<(), hyper::Error> {
