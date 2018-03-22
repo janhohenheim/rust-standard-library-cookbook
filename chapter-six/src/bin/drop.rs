@@ -34,7 +34,7 @@ fn main() {
     let d = CustomSmartPointer::new("D");
 
     // The next line would cause a compiler error,
-    // as destructors called be explicitely called
+    // as destructors cannot be explicitely called
     // c.drop();
 
     // The correct way to drop variables early is the following:
