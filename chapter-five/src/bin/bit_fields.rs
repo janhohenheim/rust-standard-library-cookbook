@@ -5,11 +5,11 @@ bitflags! {
     struct Spices: u32 {
         const SALT       = 0b0000_0001;
         const PEPPER     = 0b0000_0010;
-        const CHILLY     = 0b0000_0100;
+        const CHILI     = 0b0000_0100;
         const SAFFRON    = 0b0000_1000;
         const ALL        = Self::SALT.bits
                          | Self::PEPPER.bits
-                         | Self::CHILLY.bits
+                         | Self::CHILI.bits
                          | Self::SAFFRON.bits;
     }
 }
@@ -24,7 +24,7 @@ impl Spices {
 
 fn main() {
     let classic = Spices::SALT | Spices::PEPPER;
-    let spicy = Spices::PEPPER | Spices::CHILLY;
+    let spicy = Spices::PEPPER | Spices::CHILI;
     // Bit fields can nicely be printed
     println!("Classic: {:?}", classic);
     println!("Bits: {:08b}", classic.bits());
@@ -45,8 +45,8 @@ fn main() {
     custom.insert(Spices::SAFFRON);
     // Note that ALL is now also contained in the bit field
     println!("Custom spice after adding saffron: {:?}", custom);
-    custom.toggle(Spices::CHILLY);
-    println!("Custom spice after toggling chilly: {:?}", custom);
+    custom.toggle(Spices::CHILI);
+    println!("Custom spice after toggling chili: {:?}", custom);
     custom.remove(Spices::SALT);
     println!("Custom spice after removing salt: {:?}", custom);
 
