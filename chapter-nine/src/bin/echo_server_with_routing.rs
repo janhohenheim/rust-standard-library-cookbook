@@ -11,7 +11,7 @@ fn main() {
 }
 
 fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
-    let echo = const_service(service_fn(|req: Request| {
+    let echo_service = const_service(service_fn(|req: Request| {
         // An easy way to implement routing is
         // to simply match the request's path
         match (req.method(), req.path()) {
@@ -21,7 +21,7 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
         }
     }));
 
-    let server = Http::new().bind(addr, echo)?;
+    let server = Http::new().bind(addr, echo_service)?;
     server.run()
 }
 
