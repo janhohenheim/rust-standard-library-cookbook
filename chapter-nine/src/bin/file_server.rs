@@ -14,11 +14,11 @@ use std::io::{self, copy};
 
 fn main() {
     let addr = "[::1]:3000".parse().expect("Failed to parse address");
-    run_echo_server(&addr).expect("Failed to run web server");
+    run_file_server(&addr).expect("Failed to run web server");
 }
 
-fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
-    let echo = const_service(service_fn(|req: Request| {
+fn run_file_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
+    let file_service = const_service(service_fn(|req: Request| {
         // Setting up our routes
         match (req.method(), req.path()) {
             (&Method::Get, "/") => handle_root(),
@@ -27,7 +27,7 @@ fn run_echo_server(addr: &SocketAddr) -> Result<(), hyper::Error> {
         }
     }));
 
-    let server = Http::new().bind(addr, echo)?;
+    let server = Http::new().bind(addr, file_service)?;
     server.run()
 }
 
