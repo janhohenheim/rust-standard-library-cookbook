@@ -246,7 +246,6 @@ fn channel_unbounded() {
     t.join().ok().unwrap();
 }
 
-
 fn main() {
     println!("quick_streams():");
     quick_streams();
