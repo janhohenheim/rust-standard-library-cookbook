@@ -1,21 +1,13 @@
 extern crate futures;
+extern crate futures_util;
 
 use futures::prelude::*;
-use futures::channel::{
-    mpsc,
-    oneshot,
-};
+use futures::channel::{mpsc, oneshot};
 use futures::executor::block_on;
-use futures::future::{
-    ok,
-    err,
-    join_all,
-    select_all,
-    poll_fn,
-};
+use futures::future::{ok, err, join_all, select_all, poll_fn};
 use futures::stream::iter_result;
+use futures_util::stream::select_all as select_all_stream;
 
-use std::mem;
 use std::thread;
 
 const FINISHED: Result<Async<()>, Never> = Ok(Async::Ready(()));
@@ -29,7 +21,7 @@ fn join_all_example() {
     println!("Results of joining 3 futures: {:?}", results);
 
     // For parameters with a lifetime
-    fn sum_vecs<'a>(vecs: Vec<&'a [i32]>) -> Box<Future<Item=Vec<i32>, Error=()> + 'static> {
+    fn sum_vecs<'a>(vecs: Vec<&'a [i32]>) -> Box<Future<Item = Vec<i32>, Error = ()> + 'static> {
         Box::new(join_all(vecs.into_iter().map(|x| Ok::<i32, ()>(x.iter().sum()))))
     }
 
@@ -41,12 +33,15 @@ fn shared() {
     let thread_number = 2;
     let (tx, rx) = oneshot::channel::<u32>();
     let f = rx.shared();
-    let threads = (0..thread_number).map(|_| {
-        let cloned_f = f.clone();
-        thread::spawn(move || {
-            block_on(cloned_f).unwrap();
+    let threads = (0..thread_number)
+        .map(|thread_index| {
+            let cloned_f = f.clone();
+            thread::spawn(move || {
+                let value = block_on(cloned_f).unwrap();
+                println!("Thread #{}: {:?}", thread_index, *value);
+            })
         })
-    }).collect::<Vec<_>>();
+        .collect::<Vec<_>>();
     tx.send(42).unwrap();
 
     let shared_return = block_on(f).unwrap();
@@ -76,43 +71,45 @@ fn select_all_example() {
     let (tx_2, rx_2) = mpsc::unbounded::<u32>();
     let (tx_3, rx_3) = mpsc::unbounded::<u32>();
 
-    let streams = vec![rx_1.into_future(), rx_2.into_future(), rx_3.into_future()];
-    let stream = select_all(streams);
+    let streams = vec![rx_1, rx_2, rx_3];
+    let stream = select_all_stream(streams);
 
     tx_1.unbounded_send(3).unwrap();
     tx_2.unbounded_send(6).unwrap();
     tx_3.unbounded_send(9).unwrap();
 
-    let results = block_on(stream).unwrap();
-    println!("results for select_all on streams: {:?}", results);
-    mem::drop((tx_1, tx_2, tx_3));
+    let (value, details) = block_on(stream.next()).unwrap();
+
+    println!("value for select_all on streams: {:?}", value);
+    println!("stream details: {:?}", details);
 }
 
 fn flatten() {
-    let f = ok::<_, u32>(ok::<u32, u32>(100));
+    let f = ok::<_, _>(ok::<u32, Never>(100));
     let f = f.flatten();
     let results = block_on(f).unwrap();
     println!("results: {}", results);
 }
 
 fn fuse() {
-    let mut f = ok::<u32, u32>(123).fuse();
+    let mut f = ok::<u32, Never>(123).fuse();
 
-    block_on(poll_fn(move|mut cx| {
-        let first_result = f.poll(&mut cx);
-        let second_result = f.poll(&mut cx);
-        let third_result = f.poll(&mut cx);
+    block_on(poll_fn(move |mut cx| {
+            let first_result = f.poll(&mut cx);
+            let second_result = f.poll(&mut cx);
+            let third_result = f.poll(&mut cx);
 
-        println!("first result: {:?}", first_result);
-        println!("second result: {:?}", second_result);
-        println!("third result: {:?}", third_result);
+            println!("first result: {:?}", first_result);
+            println!("second result: {:?}", second_result);
+            println!("third result: {:?}", third_result);
 
-        FINISHED
-    })).unwrap();
+            FINISHED
+        }))
+        .unwrap();
 }
 
 fn inspect() {
-    let f = ok::<u32, u32>(111);
+    let f = ok::<u32, Never>(111);
     let f = f.inspect(|&val| println!("inspecting: {}", val));
     let results = block_on(f).unwrap();
     println!("results: {}", results);
@@ -121,8 +118,8 @@ fn inspect() {
 fn chaining() {
     let (tx, rx) = mpsc::channel(3);
     let f = tx.send(1)
-                .and_then(|tx| tx.send(2))
-                .and_then(|tx| tx.send(3));
+        .and_then(|tx| tx.send(2))
+        .and_then(|tx| tx.send(3));
 
     let t = thread::spawn(move || {
         block_on(f.into_future()).unwrap();
@@ -130,7 +127,7 @@ fn chaining() {
 
     t.join().unwrap();
 
-    let result = block_on(rx.collect()).unwrap();
+    let result: Vec<_> = block_on(rx.collect()).unwrap();
     println!("Result from chaining and_then: {:?}", result);
 
     // Chaining streams together
@@ -140,29 +137,29 @@ fn chaining() {
     let stream = stream1.chain(stream2)
         .then(|result| Ok::<_, ()>(result));
 
-    let result = block_on(stream.collect()).unwrap();
+    let result: Vec<_> = block_on(stream.collect()).unwrap();
     println!("Result from chaining our streams together: {:?}", result);
 }
 
 fn main() {
-  println!("join_all_example():");
-  join_all_example();
+    println!("join_all_example():");
+    join_all_example();
 
-  println!("\nshared():");
-  shared();
+    println!("\nshared():");
+    shared();
 
-  println!("\nselect_all_example():");
-  select_all_example();
+    println!("\nselect_all_example():");
+    select_all_example();
 
-  println!("\nflatten():");
-  flatten();
+    println!("\nflatten():");
+    flatten();
 
-  println!("\nfuse():");
-  fuse();
+    println!("\nfuse():");
+    fuse();
 
-  println!("\ninspect():");
-  inspect();
+    println!("\ninspect():");
+    inspect();
 
-  println!("\nchaining():");
-  chaining();
+    println!("\nchaining():");
+    chaining();
 }
