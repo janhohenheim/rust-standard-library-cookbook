@@ -1,5 +1,5 @@
 [[package]]
-name = "cookbook"
+name = "chapter-eight"
 version = "0.1.0"
 dependencies = [
  "futures 0.2.0-beta (registry+https://github.com/rust-lang/crates.io-index)",
