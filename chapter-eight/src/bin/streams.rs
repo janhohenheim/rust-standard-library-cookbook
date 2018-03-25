@@ -213,7 +213,7 @@ fn channel_threads_blocking() {
     println!("The first number that we sent was: {}", result.unwrap());
 
     drop(block_on(rx_2.next()).ok().unwrap());
-    let result = block_on(rx.next()).ok().unwrap().0;
+    let (result, _) = block_on(rx.next()).ok().unwrap();
     println!("The second number that we sent was: {}", result.unwrap());
 
     t.join().unwrap();
