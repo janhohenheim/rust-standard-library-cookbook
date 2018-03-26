@@ -5,10 +5,7 @@ use std::thread;
 use futures::prelude::*;
 use futures::executor::block_on;
 use futures::future::poll_fn;
-use futures::stream::{
-    iter_ok,
-    iter_result,
-};
+use futures::stream::{iter_ok, iter_result};
 use futures::channel::mpsc;
 
 #[derive(Debug)]
@@ -30,7 +27,7 @@ impl Stream for QuickStream {
             _ => {
                 println!("QuickStream is closing!");
                 Ok(Async::Ready(None))
-            },
+            }
         }
     }
 }
@@ -38,62 +35,70 @@ impl Stream for QuickStream {
 const FINISHED: Result<Async<()>, Never> = Ok(Async::Ready(()));
 
 fn quick_streams() {
-    let mut quick_stream = QuickStream{
-        ticks: 10,
-    };
+    let mut quick_stream = QuickStream { ticks: 10 };
 
     // Collect the first poll() call
     block_on(poll_fn(|cx| {
-        let res = quick_stream.poll_next(cx).unwrap();
-        println!("Quick stream's value: {:?}", res);
-        FINISHED
-    })).unwrap();
+            let res = quick_stream.poll_next(cx).unwrap();
+            println!("Quick stream's value: {:?}", res);
+            FINISHED
+        }))
+        .unwrap();
 
     // Collect the second poll() call
     block_on(poll_fn(|cx| {
-        let res = quick_stream.poll_next(cx).unwrap();
-        println!("Quick stream's next svalue: {:?}", res);
-        FINISHED
-    })).unwrap();
+            let res = quick_stream.poll_next(cx).unwrap();
+            println!("Quick stream's next svalue: {:?}", res);
+            FINISHED
+        }))
+        .unwrap();
 
     // And now we should be starting from 7 when collecting the rest of the stream
-    block_on(quick_stream.collect()).unwrap();
+    let result: Vec<_> = block_on(quick_stream.collect()).unwrap();
+    println!("quick_streams final result: {:?}", result);
 }
 
 fn iterate_streams() {
     use std::borrow::BorrowMut;
 
-    let stream_response     = vec![Ok(5), Ok(7), Err(false), Ok(3)];
-    let stream_response2    = vec![Ok(5), Ok(7), Err(false), Ok(3)];
-    let stream_response_len = stream_response.len() as usize;
+    let stream_response = vec![Ok(5), Ok(7), Err(false), Ok(3)];
+    let stream_response2 = vec![Ok(5), Ok(7), Err(false), Ok(3)];
 
     // Useful for converting any of the `Iterator` traits into a `Stream` trait.
-    let ok_stream   = iter_ok::<_, ()>(vec![1, 5, 23, 12]);
-    let ok_stream2  = iter_ok::<_, ()>(vec![7, 2, 14, 19]);
+    let ok_stream = iter_ok::<_, ()>(vec![1, 5, 23, 12]);
+    let ok_stream2 = iter_ok::<_, ()>(vec![7, 2, 14, 19]);
 
     let mut result_stream = iter_result(stream_response);
-    let result_stream2    = iter_result(stream_response2);
+    let result_stream2 = iter_result(stream_response2);
 
-    let ok_stream_response = block_on(ok_stream.collect());
+    let ok_stream_response: Vec<_> = block_on(ok_stream.collect()).unwrap();
     println!("ok_stream_response: {:?}", ok_stream_response);
 
-    for count in 0..stream_response_len {
-      match block_on(result_stream.borrow_mut().into_future()) {
-        Ok((res, _)) => println!("iter_result_stream result #{}: {}", count, res.unwrap()),
-        Err(err) => println!("iter_result_stream had an error #{}: {:?}", count, err.0)
-      }
+    let mut count = 1;
+    loop {
+        match block_on(result_stream.borrow_mut().next()) {
+            Ok((res, _)) => {
+                match res {
+                    Some(r) => println!("iter_result_stream result #{}: {}", count, r),
+                    None => { break }
+                }
+            },
+            Err((err, _)) => println!("iter_result_stream had an error #{}: {:?}", count, err),
+        }
+        count += 1;
     }
 
     // Alternative way of iterating through an ok stream
-    let ok_res = block_on(ok_stream2.collect()).unwrap();
-    for (_, ok_val) in ok_res.into_iter().enumerate() {
-      println!("ok_stream2 value: {}", ok_val);
+    let ok_res: Vec<_> = block_on(ok_stream2.collect()).unwrap();
+    for ok_val in ok_res.into_iter() {
+        println!("ok_stream2 value: {}", ok_val);
     }
 
-    match block_on(result_stream2.collect()) {
-      Ok(s) => println!("iter_result_stream2 success: {:?}", s),
-      Err(err) => println!("iter_result_stream2 has failed: {:?}", err)
-    };
+    let (_, stream) = block_on(result_stream2.next()).unwrap();
+    let (_, stream) = block_on(stream.next()).unwrap();
+    let (err, _) = block_on(stream.next()).unwrap_err();
+
+    println!("The error for our result_stream2 was: {:?}", err);
 
     println!("All done.");
 }
@@ -106,15 +111,15 @@ fn channel_threads() {
         for i in 0..MAX {
             loop {
                 if tx.try_send(i).is_ok() {
-                    break
+                    break;
                 } else {
-                  println!("Thread transaction #{} is still pending!", i);
+                    println!("Thread transaction #{} is still pending!", i);
                 }
             }
         }
     });
 
-    let result = block_on(rx.collect()).unwrap();
+    let result: Vec<_> = block_on(rx.collect()).unwrap();
     for (index, res) in result.into_iter().enumerate() {
         println!("Channel #{} result: {}", index, res);
     }
@@ -129,58 +134,62 @@ fn channel_error() {
 
     // This should fail
     match tx.try_send("fail") {
-      Ok(_) => println!("This should not have been successful"),
-      Err(err) => println!("Send failed! {:?}", err)
+        Ok(_) => println!("This should not have been successful"),
+        Err(err) => println!("Send failed! {:?}", err),
     }
 
-    let (result, rx) = block_on(rx.into_future()).ok().unwrap();
-    println!("The result of the channel transaction is: {}", result.unwrap());
+    let (result, rx) = block_on(rx.next()).ok().unwrap();
+    println!("The result of the channel transaction is: {}",
+             result.unwrap());
 
     // Now we should be able send to the transaction since we poll'ed a result already
     tx.try_send("hasta la vista").unwrap();
     drop(tx);
 
-    let (result, rx) = block_on(rx.into_future()).ok().unwrap();
-    println!("The next result of the channel transaction is: {}", result.unwrap());
+    let (result, rx) = block_on(rx.next()).ok().unwrap();
+    println!("The next result of the channel transaction is: {}",
+             result.unwrap());
 
     // Pulling more should result in None
-    let result = block_on(rx.into_future()).ok().unwrap().0;
-    println!("The last result of the channel transaction is: {:?}", result);
+    let (result, _) = block_on(rx.next()).ok().unwrap();
+    println!("The last result of the channel transaction is: {:?}",
+             result);
 }
 
 fn channel_buffer() {
     let (mut tx, mut rx) = mpsc::channel::<i32>(0);
 
     let f = poll_fn(move |cx| {
-        tx.poll_flush(cx).unwrap();
         if !tx.poll_ready(cx).unwrap().is_ready() {
-          panic!("detailed_buffer: transaction should have been ready after flushing...");
+            panic!("transactions should be ready right away!");
         }
 
         tx.start_send(20).unwrap();
         if tx.poll_ready(cx).unwrap().is_pending() {
-          println!("detailed_buffer: transaction is pending...");
+            println!("transaction is pending...");
         }
 
         // When we're still in "Pending mode" we should not be able
         // to send more messages/values to the receiver
         if tx.start_send(10).unwrap_err().is_full() {
-          println!("detailed_buffer: transaction could not have been sent to the receiver due to being full...");
+            println!("transaction could not have been sent to the receiver due \
+                      to being full...");
         }
 
         let result = rx.poll_next(cx).unwrap();
-        println!("detailed_buffer: the first result is: {:?}", result);
-        println!("detailed_buffer: is transaction ready? {:?}", tx.poll_ready(cx).unwrap().is_ready());
+        println!("the first result is: {:?}", result);
+        println!("is transaction ready? {:?}",
+                 tx.poll_ready(cx).unwrap().is_ready());
 
         // We should now be able to send another message since we've pulled
         // the first message into a result/value/variable.
-        if ! tx.poll_ready(cx).unwrap().is_ready() {
-          panic!("detailed_buffer: transaction should be ready!");
+        if !tx.poll_ready(cx).unwrap().is_ready() {
+            panic!("transaction should be ready!");
         }
 
         tx.start_send(22).unwrap();
         let result = rx.poll_next(cx).unwrap();
-        println!("detailed_buffer: new result for transaction is: {:?}", result);
+        println!("new result for transaction is: {:?}", result);
 
         FINISHED
     });
@@ -190,21 +199,21 @@ fn channel_buffer() {
 
 fn channel_threads_blocking() {
     let (tx, rx) = mpsc::channel::<i32>(0);
-    let (tx_ping, rx_ping) = mpsc::channel::<()>(2);
+    let (tx_2, rx_2) = mpsc::channel::<()>(2);
 
-    let t = thread::spawn(move|| {
-        let tx_ping = tx_ping.sink_map_err(|_| panic!());
-        let (a, b) = block_on(tx.send(10).join(tx_ping.send(()))).unwrap();
+    let t = thread::spawn(move || {
+        let tx_2 = tx_2.sink_map_err(|_| panic!());
+        let (a, b) = block_on(tx.send(10).join(tx_2.send(()))).unwrap();
 
         block_on(a.send(30).join(b.send(()))).unwrap();
     });
 
-    let rx_ping = block_on(rx_ping.into_future()).ok().unwrap().1;
-    let (result, rx) = block_on(rx.into_future()).ok().unwrap();
+    let (_, rx_2) = block_on(rx_2.next()).ok().unwrap();
+    let (result, rx) = block_on(rx.next()).ok().unwrap();
     println!("The first number that we sent was: {}", result.unwrap());
 
-    drop(block_on(rx_ping.into_future()).ok().unwrap());
-    let result = block_on(rx.into_future()).ok().unwrap().0;
+    drop(block_on(rx_2.next()).ok().unwrap());
+    let (result, _) = block_on(rx.next()).ok().unwrap();
     println!("The second number that we sent was: {}", result.unwrap());
 
     t.join().unwrap();
@@ -215,17 +224,17 @@ fn channel_unbounded() {
     const MAX_THREADS: u32 = 4;
     let (tx, rx) = mpsc::unbounded::<i32>();
 
-    let t = thread::spawn(move|| {
-        let result = block_on(rx.collect()).unwrap();
-        for item in result.iter().enumerate() {
-          println!("channel_unbounded: results on rx: {:?}", item);
+    let t = thread::spawn(move || {
+        let result: Vec<_> = block_on(rx.collect()).unwrap();
+        for item in result.iter() {
+            println!("channel_unbounded: results on rx: {:?}", item);
         }
     });
 
     for _ in 0..MAX_THREADS {
         let tx = tx.clone();
 
-        thread::spawn(move|| {
+        thread::spawn(move || {
             for _ in 0..MAX_SENDS {
                 tx.unbounded_send(1).unwrap();
             }
@@ -236,7 +245,6 @@ fn channel_unbounded() {
 
     t.join().ok().unwrap();
 }
-
 
 fn main() {
     println!("quick_streams():");

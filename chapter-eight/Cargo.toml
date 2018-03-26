@@ -4,6 +4,6 @@ name = "chapter-eight"
 version = "0.1.0"
 
 [dependencies]
-futures = "0.2.0-alpha"
-futures-core = "0.2.0-alpha"
-futures-util = "0.2.0-alpha"
+futures = "0.2.0-beta"
+futures-core = "0.2.0-beta"
+futures-util = "0.2.0-beta"

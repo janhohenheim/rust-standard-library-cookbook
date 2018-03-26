@@ -2,7 +2,7 @@ extern crate futures;
 
 use futures::prelude::*;
 use futures::future::poll_fn;
-use futures::executor::{block_on};
+use futures::executor::block_on;
 use futures::sink::flush;
 use futures::stream::iter_ok;
 use futures::task::{Waker, Context};
@@ -14,7 +14,9 @@ fn vector_sinks() {
     let result = vector.start_send(0);
     let result2 = vector.start_send(7);
 
-    println!("vector_sink: results of sending should both be Ok(()): {:?} and {:?}", result, result2);
+    println!("vector_sink: results of sending should both be Ok(()): {:?} and {:?}",
+             result,
+             result2);
     println!("The entire vector is now {:?}", vector);
 
     // Now we need to flush our vector sink.
@@ -23,7 +25,6 @@ fn vector_sinks() {
     println!("Our vector value: {:?}", flush.into_inner().unwrap());
 
     let vector = Vec::new();
-    // .send() requires flushing alternatively we could aggregate our processes and use send_all
     let mut result = vector.send(2);
     // safe to unwrap since we know that we have not flushed the sink yet
     let result = result.get_mut().unwrap().send(4);
@@ -35,7 +36,8 @@ fn vector_sinks() {
     println!("Our vector should already have one element: {:?}", vector);
 
     let result = block_on(vector.send(2)).unwrap();
-    println!("We can still send to our stick to ammend values: {:?}", result);
+    println!("We can still send to our stick to ammend values: {:?}",
+             result);
 
     let vector = Vec::new();
     let send_all = vector.send_all(iter_ok(vec![1, 2, 3]));
@@ -48,18 +50,14 @@ fn vector_sinks() {
 }
 
 fn mapping_sinks() {
-    let sink = Vec::new().with(|elem: i32| -> Result<i32, Never> {
-        Ok(elem * elem)
-    });
+    let sink = Vec::new().with(|elem: i32| Ok::<i32, Never>(elem * elem));
 
     let sink = block_on(sink.send(0)).unwrap();
     let sink = block_on(sink.send(3)).unwrap();
     let sink = block_on(sink.send(5)).unwrap();
     println!("sink with() value: {:?}", sink.into_inner());
 
-    let sink = Vec::new().with_flat_map(|elem| {
-        iter_ok(vec![elem; elem].into_iter().map(|y| y))
-    });
+    let sink = Vec::new().with_flat_map(|elem| iter_ok(vec![elem; elem].into_iter().map(|y| y * y)));
 
     let sink = block_on(sink.send(0)).unwrap();
     let sink = block_on(sink.send(3)).unwrap();
@@ -72,7 +70,7 @@ fn fanout() {
     let sink1 = vec![];
     let sink2 = vec![];
     let sink = sink1.fanout(sink2);
-    let stream = iter_ok(vec![1,2,3]);
+    let stream = iter_ok(vec![1, 2, 3]);
     let (sink, _) = block_on(sink.send_all(stream)).unwrap();
     let (sink1, sink2) = sink.into_inner();
 
@@ -101,14 +99,14 @@ impl<T> Sink for ManualSink<T> {
     }
 
     fn poll_ready(&mut self, _cx: &mut Context) -> Poll<(), ()> {
-      Ok(Async::Ready(()))
+        Ok(Async::Ready(()))
     }
 
     fn poll_flush(&mut self, cx: &mut Context) -> Poll<(), ()> {
         if self.data.is_empty() {
             Ok(Async::Ready(()))
         } else {
-            self.waiting_tasks.push(cx.waker());
+            self.waiting_tasks.push(cx.waker().clone());
             Ok(Async::Pending)
         }
     }
@@ -122,7 +120,7 @@ impl<T> ManualSink<T> {
     fn new() -> ManualSink<T> {
         ManualSink {
             data: Vec::new(),
-            waiting_tasks: Vec::new()
+            waiting_tasks: Vec::new(),
         }
     }
 
@@ -137,7 +135,7 @@ impl<T> ManualSink<T> {
 }
 
 fn manual_flush() {
-    let mut sink = ManualSink::new().with(|x| -> Result<Option<i32>, ()> { Ok(x) });
+    let mut sink = ManualSink::new().with(|x| Ok::<Option<i32>, ()>(x));
     let _ = sink.get_mut().start_send(Some(3));
     let _ = sink.get_mut().start_send(Some(7));
 
@@ -149,7 +147,8 @@ fn manual_flush() {
         println!("Our sink after trying to flush: {:?}", sink.get_ref());
 
         let results = sink.get_mut().force_flush();
-        println!("Sink data after manually flushing: {:?}", sink.get_ref().data);
+        println!("Sink data after manually flushing: {:?}",
+                 sink.get_ref().data);
         println!("Final results of sink: {:?}", results);
 
         Ok(Async::Ready(Some(())))
@@ -158,16 +157,16 @@ fn manual_flush() {
     block_on(f).unwrap();
 }
 
-fn  main() {
-  println!("vector_sinks():");
-  vector_sinks();
+fn main() {
+    println!("vector_sinks():");
+    vector_sinks();
 
-  println!("\nmapping_sinks():");
-  mapping_sinks();
+    println!("\nmapping_sinks():");
+    mapping_sinks();
 
-  println!("\nfanout():");
-  fanout();
+    println!("\nfanout():");
+    fanout();
 
-  println!("\nmanual_flush():");
-  manual_flush();
+    println!("\nmanual_flush():");
+    manual_flush();
 }
