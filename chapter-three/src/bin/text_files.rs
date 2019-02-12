@@ -57,8 +57,8 @@ fn write_file(path: &str, content: &str) -> io::Result<()> {
     // create() opens a file with the standard options
     // to create, write and truncate a file
     let file = File::create(path)?;
-    // Wrap the file in a BufReader
-    // to read in an efficient way
+    // Wrap the file in a BufWriter
+    // to write in an efficient way
     let mut buf_writer = BufWriter::new(file);
     buf_writer.write_all(content.as_bytes())?;
     Ok(())
