@@ -59,7 +59,7 @@ fn main() {
 
 
 fn encode_bytes(bytes: &[u8]) -> io::Result<Vec<u8>> {
-    // You can choose your compression algorithm and it's efficiency
+    // You can choose your compression algorithm and its efficiency
     let mut encoder = ZlibEncoder::new(Vec::new(), Compression::Default);
     encoder.write_all(bytes)?;
     encoder.finish()
