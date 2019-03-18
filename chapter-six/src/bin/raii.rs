@@ -10,7 +10,7 @@ struct SomeOsFunctionality<T> {
     // The data variable represents whatever useful information
     // the user might provide to the OS functionality
     data: T,
-    // The underlying struct is usually not savely movable,
+    // The underlying struct is usually not safely movable,
     // so it's given a constant address in a box
     inner: Box<SomeOsSpecificFunctionalityHandle>,
 }
